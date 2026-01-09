@@ -2,6 +2,20 @@
 
 All notable changes to Fotios Claude System will be documented in this file.
 
+## [2.26.16] - 2026-01-09
+
+### Added
+- **VM Installation Guide**: Complete guide for installing on virtual machines
+  - VMware Workstation/Fusion (Windows/macOS)
+  - Hyper-V (Windows) with feature activation steps
+  - VirtualBox (Windows/macOS)
+  - UTM (macOS Apple Silicon)
+  - Parallels (macOS)
+  - Ubuntu 24.04 installation walkthrough
+  - Post-install setup commands
+
+---
+
 ## [2.26.15] - 2026-01-09
 
 ### Added
