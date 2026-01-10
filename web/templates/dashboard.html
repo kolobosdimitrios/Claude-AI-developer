@@ -194,9 +194,206 @@
             font-weight: 500;
             transition: all 0.2s ease;
         }
-        .nav a:hover {
+        .nav a:hover, .nav a.active {
             color: var(--text-primary);
             background: var(--bg-card);
+        }
+        .nav-right .nav-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        .nav-right .nav-link:hover {
+            color: var(--text-primary);
+            background: var(--bg-card);
+        }
+
+        /* Claude Header Buttons */
+        .nav-right {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .claude-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid var(--border-subtle);
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        .claude-btn-license {
+            background: var(--bg-card);
+            color: var(--text-secondary);
+        }
+        .claude-btn-license.activated {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: rgba(16, 185, 129, 0.4);
+            color: var(--accent-green);
+        }
+        .claude-btn-license.not-activated {
+            background: rgba(245, 158, 11, 0.15);
+            border-color: rgba(245, 158, 11, 0.4);
+            color: var(--accent-orange);
+            animation: pulse-orange 2s ease-in-out infinite;
+        }
+        @keyframes pulse-orange {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+            50% { opacity: 0.8; box-shadow: 0 0 15px 2px rgba(245, 158, 11, 0.3); }
+        }
+        .claude-btn-assistant {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border: none;
+            color: white;
+        }
+        .claude-btn-assistant:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--glow-primary);
+        }
+        .claude-btn:hover {
+            border-color: var(--border-glow);
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        /* Activation Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .modal-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .modal-close:hover { color: var(--text-primary); background: var(--bg-card); }
+        .modal-body { padding: 24px; overflow-y: auto; max-height: calc(90vh - 140px); }
+
+        /* Activation Tabs */
+        .activation-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 20px;
+        }
+        .activation-tab {
+            flex: 1;
+            padding: 12px 20px;
+            border: 1px solid var(--border-subtle);
+            background: var(--bg-card);
+            color: var(--text-muted);
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .activation-tab:first-child { border-radius: 8px 0 0 8px; }
+        .activation-tab:last-child { border-radius: 0 8px 8px 0; border-left: none; }
+        .activation-tab.active {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border-color: var(--accent-primary);
+        }
+        .activation-panel { display: none; }
+        .activation-panel.active { display: block; }
+
+        /* Terminal in Modal */
+        .activation-terminal {
+            background: #000;
+            border-radius: 8px;
+            height: 400px;
+            margin-top: 16px;
+        }
+        .activation-controls {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .activation-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        .activation-btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+        }
+        .activation-btn-primary:hover { box-shadow: var(--glow-primary); }
+        .activation-btn-secondary {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+        }
+        .activation-btn-danger {
+            background: linear-gradient(135deg, var(--accent-red), #dc2626);
+            color: white;
+        }
+
+        /* API Key Input */
+        .apikey-input {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .apikey-input input {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-subtle);
+            background: var(--bg-card);
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .apikey-input input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
         }
 
         /* Container */
@@ -807,10 +1004,66 @@
     <div class="header">
         <h1>Fotios Claude</h1>
         <div class="nav">
+            <a href="/dashboard" class="active">Dashboard</a>
             <a href="/projects">Projects</a>
+            <a href="/tickets">Tickets</a>
             <a href="/console">Console</a>
             <a href="/history">History</a>
-            <a href="/logout">Logout ({{ user }})</a>
+        </div>
+        <div class="nav-right">
+            <button class="claude-btn claude-btn-license not-activated" id="claudeLicenseBtn" onclick="openActivationModal()">
+                <span class="status-dot"></span>
+                <span id="licenseText">Activate Claude</span>
+            </button>
+            <a href="/claude-assistant" class="claude-btn claude-btn-assistant">
+                Claude Assistant
+            </a>
+            <a href="/logout" class="nav-link">Logout</a>
+        </div>
+    </div>
+
+    <!-- Activation Modal -->
+    <div class="modal-overlay" id="activationModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Claude License Activation</h2>
+                <button class="modal-close" onclick="closeActivationModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="activation-tabs">
+                    <button class="activation-tab active" onclick="showActivationTab('subscription')">Subscription</button>
+                    <button class="activation-tab" onclick="showActivationTab('apikey')">API Key</button>
+                </div>
+
+                <!-- Subscription Tab -->
+                <div class="activation-panel active" id="panel-subscription">
+                    <p style="color: var(--text-secondary); margin-bottom: 16px;">
+                        Activate with your Claude Pro/Max subscription. Copy the URL, authorize in browser, then paste the code.
+                    </p>
+                    <p style="color: var(--accent-orange); font-size: 13px; margin-bottom: 16px;">
+                        <strong>Note:</strong> Use right-click for copy/paste, NOT Ctrl+C/Ctrl+V
+                    </p>
+                    <div id="activation-terminal" class="activation-terminal"></div>
+                    <div class="activation-controls">
+                        <button class="activation-btn activation-btn-primary" id="startActivationBtn" onclick="startActivation()">Start Activation</button>
+                        <button class="activation-btn activation-btn-secondary" id="stopActivationBtn" onclick="stopActivation()" disabled>Stop</button>
+                        <button class="activation-btn activation-btn-danger" id="deactivateBtn" onclick="deactivateLicense()" style="margin-left: auto; display: none;">Deactivate</button>
+                    </div>
+                </div>
+
+                <!-- API Key Tab -->
+                <div class="activation-panel" id="panel-apikey">
+                    <p style="color: var(--text-secondary); margin-bottom: 16px;">
+                        Activate with an Anthropic API key from console.anthropic.com
+                    </p>
+                    <div class="apikey-input">
+                        <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-...">
+                        <button class="activation-btn activation-btn-primary" onclick="saveApiKey()">Save API Key</button>
+                    </div>
+                </div>
+
+                <div id="activationStatus" style="margin-top: 16px; padding: 12px; border-radius: 8px; display: none;"></div>
+            </div>
         </div>
     </div>
 
@@ -1208,6 +1461,256 @@
 
         // Full page refresh every 60 seconds
         setTimeout(() => location.reload(), 60000);
+
+        // ============ CLAUDE ACTIVATION ============
+
+        let activationTerm = null;
+        let activationFitAddon = null;
+        let activationSessionId = null;
+        let activationPollInterval = null;
+
+        // Check Claude license status on page load
+        async function checkClaudeStatus() {
+            try {
+                const resp = await fetch('/api/claude/status');
+                const data = await resp.json();
+                const btn = document.getElementById('claudeLicenseBtn');
+                const text = document.getElementById('licenseText');
+                const deactivateBtn = document.getElementById('deactivateBtn');
+
+                if (data.activated) {
+                    btn.classList.remove('not-activated');
+                    btn.classList.add('activated');
+                    text.textContent = 'License Active';
+                    if (deactivateBtn) deactivateBtn.style.display = 'block';
+                } else {
+                    btn.classList.remove('activated');
+                    btn.classList.add('not-activated');
+                    text.textContent = 'Activate Claude';
+                    if (deactivateBtn) deactivateBtn.style.display = 'none';
+                }
+            } catch (e) {
+                console.error('Status check error:', e);
+            }
+        }
+
+        function openActivationModal() {
+            document.getElementById('activationModal').classList.add('show');
+            if (!activationTerm) {
+                initActivationTerminal();
+            }
+            checkClaudeStatus();
+        }
+
+        function closeActivationModal() {
+            document.getElementById('activationModal').classList.remove('show');
+            if (activationSessionId) {
+                stopActivation();
+            }
+        }
+
+        function showActivationTab(tab) {
+            document.querySelectorAll('.activation-tab').forEach((t, i) => {
+                t.classList.toggle('active', (tab === 'subscription' && i === 0) || (tab === 'apikey' && i === 1));
+            });
+            document.getElementById('panel-subscription').classList.toggle('active', tab === 'subscription');
+            document.getElementById('panel-apikey').classList.toggle('active', tab === 'apikey');
+        }
+
+        function initActivationTerminal() {
+            // Load xterm.js dynamically
+            if (!window.Terminal) {
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = 'https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.min.css';
+                document.head.appendChild(link);
+
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.min.js';
+                script.onload = () => {
+                    const fitScript = document.createElement('script');
+                    fitScript.src = 'https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.min.js';
+                    fitScript.onload = createActivationTerminal;
+                    document.head.appendChild(fitScript);
+                };
+                document.head.appendChild(script);
+            } else {
+                createActivationTerminal();
+            }
+        }
+
+        function createActivationTerminal() {
+            activationTerm = new Terminal({
+                cursorBlink: true,
+                fontSize: 14,
+                fontFamily: '"JetBrains Mono", monospace',
+                theme: {
+                    background: '#000000',
+                    foreground: '#e2e8f0',
+                    cursor: '#6366f1'
+                }
+            });
+            activationFitAddon = new FitAddon.FitAddon();
+            activationTerm.loadAddon(activationFitAddon);
+            activationTerm.open(document.getElementById('activation-terminal'));
+            activationFitAddon.fit();
+            activationTerm.writeln('\x1b[38;5;246m Click "Start Activation" to begin \x1b[0m');
+
+            activationTerm.onData(data => {
+                if (activationSessionId) {
+                    sendActivationInput(data);
+                }
+            });
+
+            window.addEventListener('resize', () => {
+                if (activationFitAddon) activationFitAddon.fit();
+                if (activationSessionId) resizeActivationTerminal();
+            });
+        }
+
+        async function startActivation() {
+            document.getElementById('startActivationBtn').disabled = true;
+            try {
+                const resp = await fetch('/api/claude/activate/start', { method: 'POST' });
+                const data = await resp.json();
+                if (data.success) {
+                    activationSessionId = data.session_id;
+                    activationTerm.clear();
+                    activationTerm.focus();
+                    document.getElementById('stopActivationBtn').disabled = false;
+                    resizeActivationTerminal();
+                    activationPollInterval = setInterval(pollActivationOutput, 100);
+                } else {
+                    showActivationStatus('error', 'Failed to start: ' + (data.error || 'Unknown'));
+                    document.getElementById('startActivationBtn').disabled = false;
+                }
+            } catch (e) {
+                showActivationStatus('error', 'Network error');
+                document.getElementById('startActivationBtn').disabled = false;
+            }
+        }
+
+        async function pollActivationOutput() {
+            if (!activationSessionId) return;
+            try {
+                const resp = await fetch('/api/claude/activate/output/' + activationSessionId);
+                const data = await resp.json();
+                if (data.output) activationTerm.write(data.output);
+                if (data.activated) {
+                    showActivationStatus('success', 'Claude activated successfully!');
+                    checkClaudeStatus();
+                }
+                if (!data.running) {
+                    stopActivationPolling();
+                    document.getElementById('startActivationBtn').disabled = false;
+                    document.getElementById('stopActivationBtn').disabled = true;
+                }
+            } catch (e) {}
+        }
+
+        async function sendActivationInput(input) {
+            if (!activationSessionId) return;
+            try {
+                await fetch('/api/claude/activate/input/' + activationSessionId, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ input })
+                });
+            } catch (e) {}
+        }
+
+        async function resizeActivationTerminal() {
+            if (!activationSessionId || !activationTerm) return;
+            try {
+                await fetch('/api/claude/activate/resize/' + activationSessionId, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rows: activationTerm.rows, cols: activationTerm.cols })
+                });
+            } catch (e) {}
+        }
+
+        function stopActivationPolling() {
+            if (activationPollInterval) {
+                clearInterval(activationPollInterval);
+                activationPollInterval = null;
+            }
+        }
+
+        async function stopActivation() {
+            stopActivationPolling();
+            if (activationSessionId) {
+                try {
+                    await fetch('/api/claude/activate/stop/' + activationSessionId, { method: 'POST' });
+                } catch (e) {}
+                activationSessionId = null;
+            }
+            document.getElementById('startActivationBtn').disabled = false;
+            document.getElementById('stopActivationBtn').disabled = true;
+        }
+
+        async function deactivateLicense() {
+            if (!confirm('Deactivate Claude license?')) return;
+            try {
+                const resp = await fetch('/api/claude/deactivate', { method: 'POST' });
+                const data = await resp.json();
+                if (data.success) {
+                    showActivationStatus('success', 'License deactivated');
+                    checkClaudeStatus();
+                } else {
+                    showActivationStatus('error', data.error || 'Failed');
+                }
+            } catch (e) {
+                showActivationStatus('error', 'Network error');
+            }
+        }
+
+        async function saveApiKey() {
+            const apiKey = document.getElementById('apiKeyInput').value.trim();
+            if (!apiKey) {
+                showActivationStatus('error', 'Please enter an API key');
+                return;
+            }
+            if (!apiKey.startsWith('sk-ant-')) {
+                showActivationStatus('error', 'Invalid API key format');
+                return;
+            }
+            try {
+                const resp = await fetch('/api/claude/apikey', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ api_key: apiKey })
+                });
+                const data = await resp.json();
+                if (data.success) {
+                    showActivationStatus('success', 'API Key saved!');
+                    document.getElementById('apiKeyInput').value = '';
+                    checkClaudeStatus();
+                } else {
+                    showActivationStatus('error', data.error || 'Failed');
+                }
+            } catch (e) {
+                showActivationStatus('error', 'Network error');
+            }
+        }
+
+        function showActivationStatus(type, message) {
+            const status = document.getElementById('activationStatus');
+            status.style.display = 'block';
+            status.style.background = type === 'success' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)';
+            status.style.border = '1px solid ' + (type === 'success' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)');
+            status.style.color = type === 'success' ? 'var(--accent-green)' : 'var(--accent-red)';
+            status.textContent = message;
+            setTimeout(() => { status.style.display = 'none'; }, 5000);
+        }
+
+        // Check status on page load
+        checkClaudeStatus();
+
+        // Close modal on overlay click
+        document.getElementById('activationModal').addEventListener('click', function(e) {
+            if (e.target === this) closeActivationModal();
+        });
     </script>
 </body>
 </html>

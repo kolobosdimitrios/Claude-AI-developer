@@ -4,72 +4,372 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }} - Fotios Claude</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-primary: #07070d;
+            --bg-secondary: #0d0d16;
+            --bg-card: rgba(18, 18, 32, 0.7);
+            --bg-card-hover: rgba(25, 25, 45, 0.8);
+            --border-subtle: rgba(99, 102, 241, 0.15);
+            --border-glow: rgba(99, 102, 241, 0.4);
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-primary: #6366f1;
+            --accent-secondary: #8b5cf6;
+            --accent-cyan: #22d3ee;
+            --accent-green: #10b981;
+            --accent-orange: #f59e0b;
+            --accent-red: #ef4444;
+            --glow-primary: 0 0 20px rgba(99, 102, 241, 0.3);
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #1a1a2e; color: #eee; }
-        .header { background: #16213e; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #0f3460; }
-        .header h1 { font-size: 1.4em; color: #00d9ff; }
-        .nav a { color: #888; text-decoration: none; margin-left: 20px; font-size: 14px; }
-        .nav a:hover { color: #fff; }
 
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .toolbar h2 { color: #00d9ff; }
-        .back-link { color: #888; text-decoration: none; }
-        .back-link:hover { color: #fff; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
 
-        .filters { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
-        .filter-btn { padding: 8px 16px; border: 1px solid #0f3460; background: transparent; color: #888; border-radius: 20px; cursor: pointer; text-decoration: none; font-size: 13px; }
-        .filter-btn:hover { border-color: #00d9ff; color: #00d9ff; }
-        .filter-btn.active { background: #00d9ff; color: #000; border-color: #00d9ff; }
+        .aurora-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: var(--bg-primary);
+            overflow: hidden;
+        }
 
-        .search-box { margin-left: auto; }
-        .search-box input { padding: 8px 15px; border: 1px solid #0f3460; background: #1a1a2e; color: #fff; border-radius: 20px; font-size: 13px; width: 250px; }
-        .search-box input:focus { outline: none; border-color: #00d9ff; }
-        .search-box input::placeholder { color: #666; }
+        .aurora-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            animation: float 20s ease-in-out infinite;
+        }
 
-        .ticket-list { display: flex; flex-direction: column; gap: 10px; }
-        .ticket-row { background: #16213e; border-radius: 8px; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; text-decoration: none; color: inherit; border-left: 4px solid #0f3460; }
-        .ticket-row:hover { background: #1e2a4a; }
-        .ticket-row.awaiting_input { border-left-color: #9b59b6; }
-        .ticket-row.in_progress { border-left-color: #00d9ff; }
-        .ticket-row.open, .ticket-row.new { border-left-color: #ffaa00; }
-        .ticket-row.done { border-left-color: #00ff88; }
-        .ticket-row.failed { border-left-color: #ff4444; }
+        .aurora-blob:nth-child(1) {
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.4) 0%, transparent 70%);
+            top: -200px; left: -100px;
+        }
 
-        .ticket-info { flex: 1; }
-        .ticket-number { color: #00d9ff; font-weight: bold; font-size: 14px; }
-        .ticket-title { color: #fff; margin-top: 5px; }
-        .ticket-meta { color: #888; font-size: 12px; margin-top: 8px; display: flex; gap: 20px; }
+        .aurora-blob:nth-child(2) {
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.3) 0%, transparent 70%);
+            top: 50%; right: -150px;
+            animation-delay: -5s; animation-duration: 25s;
+        }
 
-        .ticket-status { text-align: right; min-width: 120px; }
-        .status-badge { padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
-        .status-badge.awaiting_input { background: #9b59b6; color: #fff; }
-        .status-badge.in_progress { background: #00d9ff; color: #000; }
-        .status-badge.open, .status-badge.new, .status-badge.pending { background: #ffaa00; color: #000; }
-        .status-badge.done { background: #00ff88; color: #000; }
-        .status-badge.failed { background: #ff4444; color: #fff; }
-        .status-badge.skipped { background: #888; color: #fff; }
+        .aurora-blob:nth-child(3) {
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(34, 211, 238, 0.25) 0%, transparent 70%);
+            bottom: -100px; left: 30%;
+            animation-delay: -10s; animation-duration: 30s;
+        }
 
-        .empty { text-align: center; padding: 50px; color: #888; }
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(50px, -30px) scale(1.05); }
+            50% { transform: translate(-30px, 50px) scale(0.95); }
+            75% { transform: translate(-50px, -20px) scale(1.02); }
+        }
+
+        .header {
+            background: rgba(13, 13, 22, 0.9);
+            backdrop-filter: blur(20px);
+            padding: 15px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-subtle);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav { display: flex; gap: 8px; align-items: center; }
+        .nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 13px;
+            padding: 8px 14px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .nav a:hover, .nav a.active {
+            color: var(--text-primary);
+            background: var(--bg-card);
+        }
+        .nav-right {
+            display: flex;
+            align-items: center;
+        }
+        .nav-right .nav-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        .nav-right .nav-link:hover {
+            color: var(--text-primary);
+            background: var(--bg-card);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .back-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: var(--text-primary); }
+
+        .ticket-count {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border-subtle);
+            background: transparent;
+            color: var(--text-secondary);
+            border-radius: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        .filter-btn:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+        .filter-btn.active {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border-color: transparent;
+        }
+
+        .search-box {
+            margin-left: auto;
+            position: relative;
+        }
+        .search-box input {
+            padding: 10px 16px 10px 40px;
+            border: 1px solid var(--border-subtle);
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border-radius: 10px;
+            font-size: 14px;
+            width: 300px;
+            transition: all 0.2s;
+        }
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+        .search-box input::placeholder { color: var(--text-muted); }
+        .search-box::before {
+            content: "🔍";
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            opacity: 0.5;
+        }
+
+        .ticket-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .ticket-row {
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 20px;
+            align-items: center;
+            text-decoration: none;
+            color: inherit;
+            border-left: 4px solid var(--border-subtle);
+            transition: all 0.2s;
+        }
+        .ticket-row:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-glow);
+            transform: translateX(4px);
+        }
+
+        .ticket-row.awaiting_input { border-left-color: var(--accent-secondary); }
+        .ticket-row.in_progress { border-left-color: var(--accent-cyan); }
+        .ticket-row.open, .ticket-row.new, .ticket-row.pending { border-left-color: var(--accent-orange); }
+        .ticket-row.done { border-left-color: var(--accent-green); }
+        .ticket-row.failed, .ticket-row.stuck { border-left-color: var(--accent-red); }
+
+        .ticket-info { flex: 1; min-width: 0; }
+
+        .ticket-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .ticket-number {
+            color: var(--accent-cyan);
+            font-weight: 600;
+            font-size: 14px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .project-badge {
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--accent-primary);
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .ticket-title {
+            color: var(--text-primary);
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .ticket-meta {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            color: var(--text-muted);
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .meta-item .label { color: var(--text-secondary); }
+
+        .ticket-status { text-align: right; }
+
+        .status-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .status-badge.awaiting_input { background: rgba(139, 92, 246, 0.2); color: var(--accent-secondary); }
+        .status-badge.in_progress { background: rgba(34, 211, 238, 0.2); color: var(--accent-cyan); }
+        .status-badge.open, .status-badge.new, .status-badge.pending { background: rgba(245, 158, 11, 0.2); color: var(--accent-orange); }
+        .status-badge.done { background: rgba(16, 185, 129, 0.2); color: var(--accent-green); }
+        .status-badge.failed, .status-badge.stuck { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); }
+        .status-badge.skipped { background: rgba(100, 116, 139, 0.2); color: var(--text-muted); }
+
+        .empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-subtle);
+        }
+        .empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+        .empty p { font-size: 15px; }
+
+        .priority-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .priority-dot.critical { background: var(--accent-red); }
+        .priority-dot.high { background: var(--accent-orange); }
+        .priority-dot.medium { background: var(--accent-cyan); }
+        .priority-dot.low { background: var(--accent-green); }
+
+        @media (max-width: 768px) {
+            .search-box input { width: 200px; }
+            .ticket-meta { gap: 12px; }
+            .filters { gap: 6px; }
+        }
     </style>
 </head>
 <body>
+    <div class="aurora-bg">
+        <div class="aurora-blob"></div>
+        <div class="aurora-blob"></div>
+        <div class="aurora-blob"></div>
+    </div>
+
     <div class="header">
-        <h1>{{ title }}</h1>
+        <h1>Fotios Claude</h1>
         <div class="nav">
             <a href="/dashboard">Dashboard</a>
             <a href="/projects">Projects</a>
+            <a href="/tickets" class="active">Tickets</a>
             <a href="/console">Console</a>
             <a href="/history">History</a>
-            <a href="/logout">Logout</a>
+        </div>
+        <div class="nav-right">
+            <a href="/logout" class="nav-link">Logout</a>
         </div>
     </div>
 
     <div class="container">
         <div class="toolbar">
             <a href="/dashboard" class="back-link">← Back to Dashboard</a>
-            <span style="color:#888">{{ tickets|length }} ticket(s)</span>
+            <span class="ticket-count">{{ tickets|length }} ticket(s) found</span>
         </div>
 
         <div class="filters">
@@ -78,8 +378,9 @@
             <a href="/tickets?status=in_progress{% if search_query %}&q={{ search_query }}{% endif %}" class="filter-btn {{ 'active' if status_filter == 'in_progress' else '' }}">In Progress</a>
             <a href="/tickets?status=awaiting_input{% if search_query %}&q={{ search_query }}{% endif %}" class="filter-btn {{ 'active' if status_filter == 'awaiting_input' else '' }}">Awaiting Input</a>
             <a href="/tickets?status=done{% if search_query %}&q={{ search_query }}{% endif %}" class="filter-btn {{ 'active' if status_filter == 'done' else '' }}">Done</a>
+            <a href="/tickets?status=failed{% if search_query %}&q={{ search_query }}{% endif %}" class="filter-btn {{ 'active' if status_filter == 'failed' else '' }}">Failed</a>
             <div class="search-box">
-                <input type="text" id="searchInput" placeholder="Search tickets..." value="{{ search_query or '' }}" onkeyup="handleSearch(event)">
+                <input type="text" id="searchInput" placeholder="Search tickets, projects..." value="{{ search_query or '' }}" onkeyup="handleSearch(event)">
             </div>
         </div>
 
@@ -88,12 +389,30 @@
                 {% for t in tickets %}
                 <a href="/ticket/{{ t.id }}" class="ticket-row {{ t.status }}">
                     <div class="ticket-info">
-                        <div class="ticket-number">{{ t.ticket_number }}</div>
+                        <div class="ticket-header">
+                            <span class="ticket-number">{{ t.ticket_number }}</span>
+                            <span class="project-badge">{{ t.project_code }} - {{ t.project_name }}</span>
+                        </div>
                         <div class="ticket-title">{{ t.title }}</div>
                         <div class="ticket-meta">
-                            <span>{{ t.project_name }}</span>
-                            <span>Priority: {{ t.priority or 'medium' }}</span>
-                            <span>Updated: {{ t.updated_at.strftime('%Y-%m-%d %H:%M') if t.updated_at else 'N/A' }}</span>
+                            <span class="meta-item">
+                                <span class="priority-dot {{ t.priority or 'medium' }}"></span>
+                                <span>{{ (t.priority or 'medium')|title }}</span>
+                            </span>
+                            <span class="meta-item">
+                                <span class="label">Created:</span>
+                                {{ t.created_at.strftime('%d/%m/%Y %H:%M') if t.created_at else 'N/A' }}
+                            </span>
+                            <span class="meta-item">
+                                <span class="label">Updated:</span>
+                                {{ t.updated_at.strftime('%d/%m/%Y %H:%M') if t.updated_at else 'N/A' }}
+                            </span>
+                            {% if t.total_tokens %}
+                            <span class="meta-item">
+                                <span class="label">Tokens:</span>
+                                {{ "{:,}".format(t.total_tokens) }}
+                            </span>
+                            {% endif %}
                         </div>
                     </div>
                     <div class="ticket-status">
@@ -103,7 +422,8 @@
                 {% endfor %}
             {% else %}
                 <div class="empty">
-                    <p>No tickets found.</p>
+                    <div class="empty-icon">🎫</div>
+                    <p>No tickets found{% if search_query %} for "{{ search_query }}"{% endif %}.</p>
                 </div>
             {% endif %}
         </div>
@@ -122,6 +442,14 @@
                 window.location.href = url;
             }
         }
+
+        // Auto-focus search on Ctrl+K or /
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey && e.key === 'k') || (e.key === '/' && document.activeElement.tagName !== 'INPUT')) {
+                e.preventDefault();
+                document.getElementById('searchInput').focus();
+            }
+        });
     </script>
 </body>
 </html>

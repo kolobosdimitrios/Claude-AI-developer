@@ -145,8 +145,36 @@
         .status-badge.failed { background: rgba(239, 68, 68, 0.15); color: var(--accent-red); border: 1px solid rgba(239, 68, 68, 0.3); }
         .status-badge.awaiting_input { background: rgba(139, 92, 246, 0.15); color: var(--accent-secondary); border: 1px solid rgba(139, 92, 246, 0.3); }
         .status-badge.skipped { background: rgba(100, 116, 139, 0.15); color: var(--text-muted); border: 1px solid rgba(100, 116, 139, 0.3); }
-        .nav a { color: var(--text-muted); text-decoration: none; margin-left: 20px; font-size: 13px; transition: color 0.2s; }
-        .nav a:hover { color: var(--text-primary); }
+        .nav { display: flex; gap: 8px; }
+        .nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .nav a:hover, .nav a.active {
+            color: var(--text-primary);
+            background: var(--bg-card);
+        }
+        .nav-right {
+            display: flex;
+            align-items: center;
+        }
+        .nav-right .nav-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        .nav-right .nav-link:hover {
+            color: var(--text-primary);
+            background: var(--bg-card);
+        }
 
         .main { flex: 1; display: flex; overflow: hidden; }
 
@@ -435,15 +463,16 @@
 
     {% if ticket %}
     <div class="header">
-        <h1>
-            <span class="ticket-num">{{ ticket.ticket_number }}</span>
-            {{ ticket.title[:50] }}{{ '...' if ticket.title|length > 50 else '' }}
-            <span class="status-badge {{ ticket.status }}">{{ ticket.status }}</span>
-        </h1>
+        <h1>Fotios Claude</h1>
         <div class="nav">
-            <a href="/project/{{ ticket.project_id }}">{{ ticket.project_name }}</a>
             <a href="/dashboard">Dashboard</a>
-            <a href="/logout">Logout</a>
+            <a href="/projects">Projects</a>
+            <a href="/tickets" class="active">Tickets</a>
+            <a href="/console">Console</a>
+            <a href="/history">History</a>
+        </div>
+        <div class="nav-right">
+            <a href="/logout" class="nav-link">Logout</a>
         </div>
     </div>
 

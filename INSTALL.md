@@ -12,7 +12,7 @@
 
 ```bash
 cd /root
-unzip fotios-claude-system-2.26.14.zip
+unzip fotios-claude-system-2.27.0.zip
 cd fotios-claude-system
 ```
 
@@ -91,6 +91,44 @@ systemctl status fotios-claude-web fotios-claude-daemon mysql lshttpd
 sudo systemctl restart fotios-claude-web fotios-claude-daemon
 ```
 
+## Upgrading
+
+To upgrade from a previous version:
+
+```bash
+# Download and extract new version
+cd /root
+unzip fotios-claude-system-2.27.0.zip
+cd fotios-claude-system
+
+# Preview what will change (recommended)
+sudo ./upgrade.sh --dry-run
+
+# Run the upgrade
+sudo ./upgrade.sh
+
+# Or skip confirmation prompts
+sudo ./upgrade.sh -y
+```
+
+### What the upgrade does
+
+1. **Backup**: Creates automatic backup in `/var/backups/fotios-claude/`
+2. **Stop services**: Safely stops web and daemon services
+3. **Database migrations**: Applies any pending schema changes
+4. **Copy files**: Updates web, scripts, and docs
+5. **Start services**: Restarts all services
+6. **Verify**: Checks services are running
+7. **Changelog**: Shows what changed in the new version
+
+### Upgrade options
+
+| Option | Description |
+|--------|-------------|
+| `--dry-run` | Preview changes without applying |
+| `-y, --yes` | Auto-confirm all prompts |
+| `-h, --help` | Show help message |
+
 ## Uninstallation
 
 ```bash
@@ -125,4 +163,4 @@ curl -fsSL https://claude.ai/install.sh | sh
 
 ---
 
-**Version:** 2.26.14
+**Version:** 2.27.0

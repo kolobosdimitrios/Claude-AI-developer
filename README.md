@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License"></a>
-  <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-2.26.16-green.svg" alt="Version"></a>
+  <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-2.27.0-green.svg" alt="Version"></a>
   <img src="https://img.shields.io/badge/Ubuntu-22.04%20|%2024.04-orange.svg" alt="Ubuntu">
   <a href="https://anthropic.com"><img src="https://img.shields.io/badge/Powered%20by-Claude%20AI-blueviolet.svg" alt="Claude AI"></a>
   <a href="https://github.com/fotsakir/Claude-AI-developer/stargazers"><img src="https://img.shields.io/github/stars/fotsakir/Claude-AI-developer?style=social" alt="Stars"></a>
@@ -130,7 +130,7 @@ This is not science fiction. This is happening now. And this project lets you ex
 ```bash
 # Download, extract, and run
 cd /root
-unzip fotios-claude-system-2.26.16.zip
+unzip fotios-claude-system-2.27.0.zip
 cd fotios-claude-system
 chmod +x setup.sh && ./setup.sh
 
@@ -144,6 +144,31 @@ The installer automatically sets up:
 - Python Flask application
 - Background daemon service
 - All required dependencies
+
+### Upgrading from Previous Version
+
+```bash
+# Download new version
+cd /root
+unzip fotios-claude-system-2.27.0.zip
+cd fotios-claude-system
+
+# Preview changes (recommended)
+sudo ./upgrade.sh --dry-run
+
+# Run upgrade
+sudo ./upgrade.sh
+
+# Or auto-confirm all prompts
+sudo ./upgrade.sh -y
+```
+
+The upgrade script will:
+- Create automatic backup of current installation
+- Apply any database migrations
+- Update all application files
+- Restart services
+- Show what changed in the new version
 
 ### Access Your Dashboard
 

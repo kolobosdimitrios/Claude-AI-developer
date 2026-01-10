@@ -6,7 +6,7 @@ Fotios Claude Admin Panel v2
 - Background daemon control
 """
 
-VERSION = "2.20.0"
+VERSION = "2.27.1"
 
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, send_file
 from flask_socketio import SocketIO, emit, join_room, leave_room
@@ -17,6 +17,13 @@ import mysql.connector
 from mysql.connector import pooling
 import bcrypt
 import os
+import pty
+import pwd
+import select
+import struct
+import fcntl
+import termios
+import signal
 import subprocess
 import threading
 import time
@@ -26,6 +33,7 @@ import string
 import zipfile
 import tempfile
 import shutil
+import uuid
 from datetime import datetime
 from functools import wraps
 
@@ -2687,6 +2695,369 @@ def internal_broadcast():
         }, room=f'ticket_{ticket_id}')
 
     return jsonify({'success': True})
+
+# ============ CLAUDE ACTIVATION ============
+
+# Store terminal sessions for activation
+activation_sessions = {}
+# Store Claude chat sessions
+claude_sessions = {}
+
+CLAUDE_USER_HOME = "/home/claude"
+
+class ActivationSession:
+    """Terminal session for Claude setup-token"""
+    def __init__(self):
+        self.user_home = CLAUDE_USER_HOME
+        self.fd = None
+        self.pid = None
+        self.output_buffer = ""
+        self.running = False
+        self.lock = threading.Lock()
+
+    def start(self):
+        claude_path = os.path.join(self.user_home, ".local/bin/claude")
+        username = os.path.basename(self.user_home)
+        try:
+            pw = pwd.getpwnam(username)
+            uid, gid = pw.pw_uid, pw.pw_gid
+        except KeyError:
+            uid, gid = None, None
+
+        pid, fd = pty.fork()
+        if pid == 0:
+            if gid: os.setgid(gid)
+            if uid: os.setuid(uid)
+            env = {
+                'HOME': self.user_home, 'USER': username, 'LOGNAME': username,
+                'TERM': 'xterm-256color', 'PATH': '/usr/local/bin:/usr/bin:/bin',
+                'SHELL': '/bin/bash', 'LANG': os.environ.get('LANG', 'en_US.UTF-8'),
+            }
+            os.chdir(self.user_home)
+            os.execvpe(claude_path, [claude_path, 'setup-token'], env)
+        else:
+            self.pid, self.fd, self.running = pid, fd, True
+            fl = fcntl.fcntl(fd, fcntl.F_GETFL)
+            fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
+            threading.Thread(target=self._reader, daemon=True).start()
+            return True
+        return False
+
+    def _reader(self):
+        while self.running:
+            try:
+                r, _, _ = select.select([self.fd], [], [], 0.1)
+                if r:
+                    data = os.read(self.fd, 4096)
+                    if data:
+                        with self.lock:
+                            self.output_buffer += data.decode('utf-8', errors='replace')
+                    else:
+                        break
+            except:
+                break
+        self.running = False
+
+    def get_output(self):
+        with self.lock:
+            out, self.output_buffer = self.output_buffer, ""
+            return out
+
+    def send_input(self, data):
+        if self.fd and self.running:
+            try:
+                os.write(self.fd, data.encode() if isinstance(data, str) else data)
+                return True
+            except: pass
+        return False
+
+    def resize(self, rows, cols):
+        if self.fd:
+            try:
+                fcntl.ioctl(self.fd, termios.TIOCSWINSZ, struct.pack('HHHH', rows, cols, 0, 0))
+            except: pass
+
+    def stop(self):
+        self.running = False
+        if self.pid:
+            try:
+                os.kill(self.pid, signal.SIGTERM)
+                os.waitpid(self.pid, os.WNOHANG)
+            except: pass
+        if self.fd:
+            try: os.close(self.fd)
+            except: pass
+
+    def is_activated(self):
+        return os.path.exists(os.path.join(self.user_home, ".claude/.credentials.json"))
+
+
+class ClaudeChatSession:
+    """Interactive Claude chat session"""
+    def __init__(self):
+        self.user_home = CLAUDE_USER_HOME
+        self.fd = None
+        self.pid = None
+        self.output_buffer = ""
+        self.running = False
+        self.lock = threading.Lock()
+
+    def start(self):
+        # Ensure config flags are set before starting Claude
+        ensure_claude_config_flags()
+
+        claude_path = os.path.join(self.user_home, ".local/bin/claude")
+        username = os.path.basename(self.user_home)
+        try:
+            pw = pwd.getpwnam(username)
+            uid, gid = pw.pw_uid, pw.pw_gid
+        except KeyError:
+            uid, gid = None, None
+
+        pid, fd = pty.fork()
+        if pid == 0:
+            if gid: os.setgid(gid)
+            if uid: os.setuid(uid)
+            # Inherit current environment and update with user-specific values
+            env = os.environ.copy()
+            env.update({
+                'HOME': self.user_home, 'USER': username, 'LOGNAME': username,
+                'TERM': 'xterm-256color', 'SHELL': '/bin/bash',
+            })
+            os.chdir(self.user_home)
+            os.execvpe(claude_path, [claude_path, '--dangerously-skip-permissions'], env)
+        else:
+            self.pid, self.fd, self.running = pid, fd, True
+            fl = fcntl.fcntl(fd, fcntl.F_GETFL)
+            fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
+            threading.Thread(target=self._reader, daemon=True).start()
+            return True
+        return False
+
+    def _reader(self):
+        while self.running:
+            try:
+                r, _, _ = select.select([self.fd], [], [], 0.1)
+                if r:
+                    data = os.read(self.fd, 4096)
+                    if data:
+                        with self.lock:
+                            self.output_buffer += data.decode('utf-8', errors='replace')
+                    else:
+                        break
+            except:
+                break
+        self.running = False
+
+    def get_output(self):
+        with self.lock:
+            out, self.output_buffer = self.output_buffer, ""
+            return out
+
+    def send_input(self, data):
+        if self.fd and self.running:
+            try:
+                os.write(self.fd, data.encode() if isinstance(data, str) else data)
+                return True
+            except: pass
+        return False
+
+    def resize(self, rows, cols):
+        if self.fd:
+            try:
+                fcntl.ioctl(self.fd, termios.TIOCSWINSZ, struct.pack('HHHH', rows, cols, 0, 0))
+            except: pass
+
+    def stop(self):
+        self.running = False
+        if self.pid:
+            try:
+                os.kill(self.pid, signal.SIGTERM)
+                os.waitpid(self.pid, os.WNOHANG)
+            except: pass
+        if self.fd:
+            try: os.close(self.fd)
+            except: pass
+
+
+def ensure_claude_config_flags():
+    """Ensure .claude.json has required flags to skip interactive prompts"""
+    config_path = os.path.join(CLAUDE_USER_HOME, ".claude.json")
+    if not os.path.exists(config_path):
+        return
+    try:
+        with open(config_path, 'r') as f:
+            config = json.load(f)
+        modified = False
+        if not config.get('hasCompletedOnboarding'):
+            config['hasCompletedOnboarding'] = True
+            modified = True
+        if not config.get('bypassPermissionsModeAccepted'):
+            config['bypassPermissionsModeAccepted'] = True
+            modified = True
+        if not config.get('preferredTheme'):
+            config['preferredTheme'] = 'dark'
+            config['theme'] = 'dark'
+            modified = True
+        if modified:
+            with open(config_path, 'w') as f:
+                json.dump(config, f, indent=2)
+    except:
+        pass
+
+# Claude License Status
+@app.route('/api/claude/status')
+@login_required
+def claude_status():
+    creds = os.path.join(CLAUDE_USER_HOME, ".claude/.credentials.json")
+    env_file = os.path.join(CLAUDE_USER_HOME, ".claude/.env")
+    activated = os.path.exists(creds) or os.path.exists(env_file)
+    if activated:
+        ensure_claude_config_flags()
+    return jsonify({'activated': activated})
+
+# Activation Terminal Routes
+@app.route('/api/claude/activate/start', methods=['POST'])
+@login_required
+def claude_activate_start():
+    session_id = str(uuid.uuid4())
+    sess = ActivationSession()
+    if sess.start():
+        activation_sessions[session_id] = sess
+        return jsonify({'success': True, 'session_id': session_id})
+    return jsonify({'success': False, 'error': 'Failed to start'})
+
+@app.route('/api/claude/activate/output/<session_id>')
+@login_required
+def claude_activate_output(session_id):
+    if session_id not in activation_sessions:
+        return jsonify({'error': 'Not found'}), 404
+    sess = activation_sessions[session_id]
+    return jsonify({'output': sess.get_output(), 'running': sess.running, 'activated': sess.is_activated()})
+
+@app.route('/api/claude/activate/input/<session_id>', methods=['POST'])
+@login_required
+def claude_activate_input(session_id):
+    if session_id not in activation_sessions:
+        return jsonify({'error': 'Not found'}), 404
+    data = request.json.get('input', '')
+    return jsonify({'success': activation_sessions[session_id].send_input(data)})
+
+@app.route('/api/claude/activate/resize/<session_id>', methods=['POST'])
+@login_required
+def claude_activate_resize(session_id):
+    if session_id not in activation_sessions:
+        return jsonify({'error': 'Not found'}), 404
+    data = request.json
+    activation_sessions[session_id].resize(data.get('rows', 24), data.get('cols', 80))
+    return jsonify({'success': True})
+
+@app.route('/api/claude/activate/stop/<session_id>', methods=['POST'])
+@login_required
+def claude_activate_stop(session_id):
+    if session_id in activation_sessions:
+        activation_sessions[session_id].stop()
+        del activation_sessions[session_id]
+    return jsonify({'success': True})
+
+@app.route('/api/claude/deactivate', methods=['POST'])
+@login_required
+def claude_deactivate():
+    creds = os.path.join(CLAUDE_USER_HOME, ".claude/.credentials.json")
+    env_file = os.path.join(CLAUDE_USER_HOME, ".claude/.env")
+    removed = []
+    try:
+        if os.path.exists(creds):
+            os.remove(creds)
+            removed.append('credentials')
+        if os.path.exists(env_file):
+            os.remove(env_file)
+            removed.append('env')
+        return jsonify({'success': True, 'message': f'Removed: {", ".join(removed)}' if removed else 'No credentials'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/claude/apikey', methods=['POST'])
+@login_required
+def claude_save_apikey():
+    api_key = request.json.get('api_key', '').strip()
+    if not api_key:
+        return jsonify({'success': False, 'error': 'No API key'})
+    if not api_key.startswith('sk-ant-'):
+        return jsonify({'success': False, 'error': 'Invalid format'})
+    try:
+        env_file = os.path.join(CLAUDE_USER_HOME, ".claude/.env")
+        os.makedirs(os.path.dirname(env_file), exist_ok=True)
+        existing = {}
+        if os.path.exists(env_file):
+            with open(env_file, 'r') as f:
+                for line in f:
+                    if '=' in line:
+                        k, v = line.strip().split('=', 1)
+                        existing[k] = v
+        existing['ANTHROPIC_API_KEY'] = api_key
+        with open(env_file, 'w') as f:
+            for k, v in existing.items():
+                f.write(f'{k}={v}\n')
+        os.chmod(env_file, 0o600)
+        # Change ownership to claude user
+        try:
+            pw = pwd.getpwnam('claude')
+            os.chown(env_file, pw.pw_uid, pw.pw_gid)
+        except: pass
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+# Claude Chat Routes
+@app.route('/api/claude/chat/start', methods=['POST'])
+@login_required
+def claude_chat_start():
+    session_id = str(uuid.uuid4())
+    sess = ClaudeChatSession()
+    if sess.start():
+        claude_sessions[session_id] = sess
+        return jsonify({'success': True, 'session_id': session_id})
+    return jsonify({'success': False, 'error': 'Failed to start'})
+
+@app.route('/api/claude/chat/output/<session_id>')
+@login_required
+def claude_chat_output(session_id):
+    if session_id not in claude_sessions:
+        return jsonify({'error': 'Not found'}), 404
+    sess = claude_sessions[session_id]
+    return jsonify({'output': sess.get_output(), 'running': sess.running})
+
+@app.route('/api/claude/chat/input/<session_id>', methods=['POST'])
+@login_required
+def claude_chat_input(session_id):
+    if session_id not in claude_sessions:
+        return jsonify({'error': 'Not found'}), 404
+    data = request.json.get('input', '')
+    return jsonify({'success': claude_sessions[session_id].send_input(data)})
+
+@app.route('/api/claude/chat/resize/<session_id>', methods=['POST'])
+@login_required
+def claude_chat_resize(session_id):
+    if session_id not in claude_sessions:
+        return jsonify({'error': 'Not found'}), 404
+    data = request.json
+    claude_sessions[session_id].resize(data.get('rows', 24), data.get('cols', 80))
+    return jsonify({'success': True})
+
+@app.route('/api/claude/chat/stop/<session_id>', methods=['POST'])
+@login_required
+def claude_chat_stop(session_id):
+    if session_id in claude_sessions:
+        claude_sessions[session_id].stop()
+        del claude_sessions[session_id]
+    return jsonify({'success': True})
+
+# Claude Assistant Page
+@app.route('/claude-assistant')
+@login_required
+def claude_assistant():
+    return render_template('claude_assistant.html', user=session.get('user'))
 
 # ============ WEBSOCKET ============
 

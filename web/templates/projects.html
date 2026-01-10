@@ -142,6 +142,22 @@
             color: var(--text-primary);
             background: var(--bg-card);
         }
+        .nav-right {
+            display: flex;
+            align-items: center;
+        }
+        .nav-right .nav-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        .nav-right .nav-link:hover {
+            color: var(--text-primary);
+            background: var(--bg-card);
+        }
 
         .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
 
@@ -555,9 +571,12 @@
         <div class="nav">
             <a href="/dashboard">Dashboard</a>
             <a href="/projects" class="active">Projects</a>
+            <a href="/tickets">Tickets</a>
             <a href="/console">Console</a>
             <a href="/history">History</a>
-            <a href="/logout">Logout</a>
+        </div>
+        <div class="nav-right">
+            <a href="/logout" class="nav-link">Logout</a>
         </div>
     </div>
 

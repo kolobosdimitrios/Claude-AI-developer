@@ -142,10 +142,13 @@ change_admin_panel() {
     # Generate bcrypt hash (using stdin to handle special characters)
     HASH=$(echo -n "$NEW_PASS" | python3 -c "import bcrypt,sys; print(bcrypt.hashpw(sys.stdin.read().encode(), bcrypt.gensalt()).decode())")
 
-    CURRENT_ROOT="${MYSQL_ROOT_PASSWORD:-rootpass123}"
-    DB_NAME="${MYSQL_DATABASE:-claude_knowledge}"
+    # Use app user credentials from system.conf (readable, has UPDATE privileges)
+    source /etc/fotios-claude/system.conf 2>/dev/null
+    APP_USER="${DB_USER:-claude_user}"
+    APP_PASS="${DB_PASSWORD:-claudepass123}"
+    DB_NAME="${DB_NAME:-claude_knowledge}"
 
-    mysql -u root -p"${CURRENT_ROOT}" ${DB_NAME} -e "UPDATE developers SET username='${NEW_USER}', password_hash='${HASH}' WHERE id=1;" 2>/dev/null
+    mysql -u "${APP_USER}" -p"${APP_PASS}" ${DB_NAME} -e "UPDATE developers SET username='${NEW_USER}', password_hash='${HASH}' WHERE id=1;" 2>/dev/null
     if [ $? -eq 0 ]; then
         sed -i "s/ADMIN_USER=.*/ADMIN_USER=${NEW_USER}/" /etc/fotios-claude/credentials.conf
         sed -i "s/ADMIN_PASSWORD=.*/ADMIN_PASSWORD=${NEW_PASS}/" /etc/fotios-claude/credentials.conf

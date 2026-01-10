@@ -572,15 +572,41 @@ systemctl start fotios-claude-daemon 2>/dev/null || true
 sleep 3
 
 # =====================================================
-# CLAUDE CODE INFO
+# CLAUDE CODE CLI INSTALLATION
 # =====================================================
 echo ""
 echo -e "${YELLOW}╔═══════════════════════════════════════════════════════════╗"
-echo "║           CLAUDE CODE                                     ║"
+echo "║           CLAUDE CODE CLI                                 ║"
 echo "╚═══════════════════════════════════════════════════════════╝${NC}"
 echo ""
-echo "To install Claude Code CLI, run:"
-echo -e "  ${CYAN}${INSTALL_DIR}/scripts/install-claude-code.sh${NC}"
+echo "Installing Claude Code CLI for user ${CLAUDE_USER}..."
+
+# Install Claude Code CLI
+if [ -f "${INSTALL_DIR}/scripts/install-claude-code.sh" ]; then
+    chmod +x "${INSTALL_DIR}/scripts/install-claude-code.sh"
+    # Run installation (without starting claude interactively)
+    su - ${CLAUDE_USER} -c 'curl -fsSL https://claude.ai/install.sh | bash' 2>/dev/null || true
+    # Add ~/.local/bin to PATH if not already there
+    if ! su - ${CLAUDE_USER} -c 'grep -q "\.local/bin" ~/.bashrc' 2>/dev/null; then
+        su - ${CLAUDE_USER} -c 'echo "export PATH=\"\$HOME/.local/bin:\$PATH\"" >> ~/.bashrc'
+    fi
+fi
+
+# Check if installed
+if su - ${CLAUDE_USER} -c 'which claude' &>/dev/null; then
+    echo -e "${GREEN}Claude Code CLI installed successfully${NC}"
+    CLAUDE_VERSION=$(su - ${CLAUDE_USER} -c 'claude --version 2>/dev/null' | head -1)
+    echo -e "  Version: ${CYAN}${CLAUDE_VERSION}${NC}"
+else
+    echo -e "${YELLOW}Claude Code CLI installation skipped or failed${NC}"
+    echo "  You can install manually later with:"
+    echo -e "  ${CYAN}curl -fsSL https://claude.ai/install.sh | bash${NC}"
+fi
+
+echo ""
+echo -e "${CYAN}Claude Activation:${NC}"
+echo "  Activate Claude via the Admin Panel web interface."
+echo "  Go to Admin Panel -> Click 'Activate Claude' button"
 echo ""
 
 # =====================================================

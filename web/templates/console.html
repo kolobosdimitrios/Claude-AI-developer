@@ -137,7 +137,24 @@
             font-weight: 500;
             transition: all 0.2s ease;
         }
-        .nav a:hover {
+        .nav a:hover, .nav a.active {
+            color: var(--text-primary);
+            background: var(--bg-card);
+        }
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .nav-right .nav-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        .nav-right .nav-link:hover {
             color: var(--text-primary);
             background: var(--bg-card);
         }
@@ -458,15 +475,20 @@
     <div class="noise"></div>
 
     <div class="header">
-        <h1>Claude Console</h1>
+        <h1>Fotios Claude</h1>
         <div class="nav">
             <a href="/dashboard">Dashboard</a>
+            <a href="/projects">Projects</a>
+            <a href="/tickets">Tickets</a>
+            <a href="/console" class="active">Console</a>
             <a href="/history">History</a>
-            <a href="/logout">Logout</a>
         </div>
-        <div class="status">
-            <span id="status-text">Connecting...</span>
-            <div class="status-dot" id="status-dot"></div>
+        <div class="nav-right">
+            <div class="status">
+                <span id="status-text">Connecting...</span>
+                <div class="status-dot" id="status-dot"></div>
+            </div>
+            <a href="/logout" class="nav-link">Logout</a>
         </div>
     </div>
 

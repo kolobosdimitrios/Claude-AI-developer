@@ -1,0 +1,38 @@
+-- Example migration file
+-- Rename to 2.27.0_description.sql (remove .example) to activate
+-- This file shows the format for database migrations
+
+-- Example 1: Create a new table
+CREATE TABLE IF NOT EXISTS audit_log (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    action VARCHAR(50) NOT NULL,
+    entity_type VARCHAR(50),
+    entity_id INT,
+    details JSON,
+    ip_address VARCHAR(45),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_user (user_id),
+    INDEX idx_action (action),
+    INDEX idx_created (created_at)
+);
+
+-- Example 2: Add a column (with existence check)
+-- SET @exist := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+--                WHERE TABLE_SCHEMA = DATABASE()
+--                AND TABLE_NAME = 'tickets'
+--                AND COLUMN_NAME = 'estimated_hours');
+--
+-- SET @query := IF(@exist = 0,
+--     'ALTER TABLE tickets ADD COLUMN estimated_hours DECIMAL(5,2) DEFAULT NULL',
+--     'SELECT "Column already exists"');
+--
+-- PREPARE stmt FROM @query;
+-- EXECUTE stmt;
+-- DEALLOCATE PREPARE stmt;
+
+-- Example 3: Add an index
+-- CREATE INDEX IF NOT EXISTS idx_tickets_status ON tickets(status);
+
+-- Example 4: Update data
+-- UPDATE settings SET value = 'new_value' WHERE key = 'some_key';
