@@ -5,6 +5,15 @@ All notable changes to the Fotios Claude System will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.35.0] - 2026-01-10
+
+### Changed
+- **Screenshots**: Updated all screenshots with fresh data
+  - Dashboard, Projects, Tickets, Console, Terminal
+  - Project Detail, Ticket Detail, History
+  - Claude Assistant, Code Editor
+  - User Guide screenshots in docs/guide/
+
 ## [2.34.0] - 2026-01-10
 
 ### Changed
