@@ -241,7 +241,7 @@ mysql -u claude_user -p claude_knowledge -e "SELECT * FROM tickets ORDER BY id D
 
 ---
 
-## Current Features (v2.32.0)
+## Current Features (v2.33.0)
 
 - Project & Ticket Management
 - Real-time Chat with Claude
@@ -276,4 +276,4 @@ mysql -u claude_user -p claude_knowledge -e "SELECT * FROM tickets ORDER BY id D
 ---
 
 *Last Updated: 2026-01-10*
-*Current Version: 2.32.0*
+*Current Version: 2.33.0*

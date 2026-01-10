@@ -5,6 +5,32 @@ All notable changes to the Fotios Claude System will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.33.0] - 2026-01-10
+
+### Added
+- **Platform Help Mode**: Claude Assistant can now help with platform questions
+  - New "Platform Help" button opens help mode
+  - Auto-loads PLATFORM_KNOWLEDGE.md with full platform documentation
+  - Claude can help with troubleshooting, code, and configuration
+  - Knows file locations, services, database queries, and more
+- **PLATFORM_KNOWLEDGE.md**: Comprehensive knowledge base for Claude Assistant
+  - Platform architecture and components
+  - File locations (source and production)
+  - Service commands and database queries
+  - All v2.32.0 features documented
+  - Troubleshooting guides
+  - Code architecture documentation
+- **Blueprint Planner Improvements**: Updated paths for production deployment
+
+### Changed
+- **setup.sh**: Now copies all documentation files to /opt/fotios-claude/
+  - config/*.md files for Claude Assistant
+  - CLAUDE_OPERATIONS.md, CLAUDE_DEV_NOTES.md, CLAUDE.md
+  - Full docs/ directory with USER_GUIDE.md
+- **upgrade.sh**: Same documentation copying as setup.sh
+- **USER_GUIDE.md**: Added sections for Web Terminal, Claude Assistant, AI Project Manager
+- **CLAUDE_OPERATIONS.md**: Added v2.32.0 features section
+
 ## [2.32.0] - 2026-01-10
 
 ### Added

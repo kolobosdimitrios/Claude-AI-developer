@@ -130,7 +130,7 @@ SELECT role, content, created_at FROM conversation_messages WHERE ticket_id=? OR
 
 ---
 
-## Features (v2.32.0)
+## Features (v2.33.0)
 
 ### 1. SmartContext
 Intelligent context management that auto-detects project structure and sends only relevant files to Claude.
@@ -436,4 +436,4 @@ When users ask questions, check these files:
 ---
 
 *Last Updated: 2026-01-10*
-*Version: 2.32.0*
+*Version: 2.33.0*

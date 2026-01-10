@@ -6,7 +6,7 @@ Fotios Claude Admin Panel v2
 - Background daemon control
 """
 
-VERSION = "2.32.0"
+VERSION = "2.33.0"
 
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, send_file
 from flask_socketio import SocketIO, emit, join_room, leave_room
