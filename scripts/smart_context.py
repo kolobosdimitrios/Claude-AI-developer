@@ -734,11 +734,120 @@ Keep each item concise (under 100 chars). Focus on technical decisions and imple
             conn.close()
 
             self.log(f"Extraction created: {tokens_before} tokens -> {extraction_data['tokens_after']} tokens")
+
+            # Update project_knowledge with learnings from this ticket
+            try:
+                self._update_project_knowledge_from_extraction(
+                    ticket_id, decisions, problems, important_notes
+                )
+            except Exception as e:
+                self.log(f"Warning: Could not update project knowledge: {e}", "WARNING")
+
             return extraction_data
 
         except Exception as e:
             self.log(f"Error creating extraction: {e}", "ERROR")
             return None
+
+    def _update_project_knowledge_from_extraction(self, ticket_id: int, decisions: List,
+                                                   problems: List, important_notes: List):
+        """Update project_knowledge table with learnings from extraction"""
+        try:
+            # Get project_id from ticket
+            conn = self.get_db()
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute("SELECT project_id FROM tickets WHERE id = %s", (ticket_id,))
+            ticket = cursor.fetchone()
+
+            if not ticket:
+                cursor.close()
+                conn.close()
+                return
+
+            project_id = ticket['project_id']
+
+            # Check if project_knowledge exists
+            cursor.execute("SELECT id FROM project_knowledge WHERE project_id = %s", (project_id,))
+            existing = cursor.fetchone()
+
+            if not existing:
+                # Create new project_knowledge record
+                cursor.execute("""
+                    INSERT INTO project_knowledge (project_id, known_gotchas, error_solutions,
+                                                   architecture_decisions, learned_from_tickets)
+                    VALUES (%s, %s, %s, %s, %s)
+                """, (
+                    project_id,
+                    json.dumps(important_notes[:10]) if important_notes else '[]',
+                    json.dumps(problems[:10]) if problems else '[]',
+                    json.dumps(decisions[:10]) if decisions else '[]',
+                    json.dumps([ticket_id])
+                ))
+                self.log(f"Created project_knowledge for project {project_id}")
+            else:
+                # Update existing - merge with existing data
+                cursor.execute("""
+                    SELECT known_gotchas, error_solutions, architecture_decisions, learned_from_tickets
+                    FROM project_knowledge WHERE project_id = %s
+                """, (project_id,))
+                existing_data = cursor.fetchone()
+
+                # Parse existing JSON
+                def parse_json_field(field):
+                    if not field:
+                        return []
+                    if isinstance(field, str):
+                        try:
+                            return json.loads(field)
+                        except:
+                            return []
+                    return field if isinstance(field, list) else []
+
+                existing_gotchas = parse_json_field(existing_data.get('known_gotchas'))
+                existing_errors = parse_json_field(existing_data.get('error_solutions'))
+                existing_decisions = parse_json_field(existing_data.get('architecture_decisions'))
+                existing_tickets = parse_json_field(existing_data.get('learned_from_tickets'))
+
+                # Merge new data (avoid duplicates)
+                for note in (important_notes or [])[:10]:
+                    if note and note not in existing_gotchas:
+                        existing_gotchas.append(note)
+
+                for prob in (problems or [])[:10]:
+                    if prob and prob not in existing_errors:
+                        existing_errors.append(prob)
+
+                for dec in (decisions or [])[:10]:
+                    if dec and dec not in existing_decisions:
+                        existing_decisions.append(dec)
+
+                if ticket_id not in existing_tickets:
+                    existing_tickets.append(ticket_id)
+
+                # Keep last 20 items max
+                cursor.execute("""
+                    UPDATE project_knowledge SET
+                        known_gotchas = %s,
+                        error_solutions = %s,
+                        architecture_decisions = %s,
+                        learned_from_tickets = %s,
+                        last_updated = NOW()
+                    WHERE project_id = %s
+                """, (
+                    json.dumps(existing_gotchas[-20:]),
+                    json.dumps(existing_errors[-20:]),
+                    json.dumps(existing_decisions[-20:]),
+                    json.dumps(existing_tickets[-50:]),
+                    project_id
+                ))
+                self.log(f"Updated project_knowledge for project {project_id} from ticket {ticket_id}")
+
+            conn.commit()
+            cursor.close()
+            conn.close()
+
+        except Exception as e:
+            self.log(f"Error updating project knowledge: {e}", "ERROR")
 
     # ═══════════════════════════════════════════════════════════════════════════
     # SMART HISTORY
