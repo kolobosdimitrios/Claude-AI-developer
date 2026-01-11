@@ -695,14 +695,26 @@ Complete this task. When finished, say "TASK COMPLETED" with a summary."""
             '-p', prompt
         ]
         try:
+            # Load API key from .env if exists
+            claude_env = os.environ.copy()
+            env_file = os.path.join(os.path.expanduser("~"), ".claude/.env")
+            if os.path.exists(env_file):
+                with open(env_file, 'r') as f:
+                    for line in f:
+                        line = line.strip()
+                        if '=' in line and not line.startswith('#'):
+                            key, value = line.split('=', 1)
+                            claude_env[key] = value
+
             # Run in project directory
             process = subprocess.Popen(
-                cmd, 
+                cmd,
                 cwd=work_path,
-                stdout=subprocess.PIPE, 
+                stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
-                text=True, 
-                bufsize=1
+                text=True,
+                bufsize=1,
+                env=claude_env
             )
             
             result = None

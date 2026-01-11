@@ -5,9 +5,16 @@
 ## Project Structure
 
 ```
-/home/claude/fotios-claude-system/    <- SOURCE (make changes here)
-/opt/fotios-claude/                   <- PRODUCTION (installed files)
+/home/claude/fotios-claude-system/    <- LOCAL SOURCE (make changes here)
+/opt/fotios-claude/                   <- LOCAL PRODUCTION (installed files)
 /home/claude/fotios-claude-system-X.Y.Z.zip  <- BACKUPS (DON'T DELETE!)
+```
+
+### Remote Server (Optional)
+```
+The remote server is not always available.
+User will provide IP/credentials when needed.
+Production path: /opt/fotios-claude/
 ```
 
 ## Workflow for Changes
@@ -25,18 +32,31 @@ sudo cp -r /home/claude/fotios-claude-system/web/templates/* /opt/fotios-claude/
 sudo cp /home/claude/fotios-claude-system/scripts/*.sh /opt/fotios-claude/scripts/
 ```
 
-### 3. Restart services if needed
+### 3. Copy to REMOTE PRODUCTION (when remote server is available)
 ```bash
-sudo systemctl restart fotios-claude-web fotios-claude-daemon
+# User will provide IP and PASSWORD
+sshpass -p 'PASSWORD' scp -o StrictHostKeyChecking=no /home/claude/fotios-claude-system/web/app.py root@REMOTE_IP:/opt/fotios-claude/web/
+sshpass -p 'PASSWORD' scp -o StrictHostKeyChecking=no /home/claude/fotios-claude-system/scripts/claude-daemon.py root@REMOTE_IP:/opt/fotios-claude/scripts/
+sshpass -p 'PASSWORD' scp -o StrictHostKeyChecking=no -r /home/claude/fotios-claude-system/web/templates/* root@REMOTE_IP:/opt/fotios-claude/web/templates/
 ```
 
-### 4. Update version numbers
+### 4. Restart services (ALWAYS!) - Both Local and Remote
+**IMPORTANT:** Always restart services after ANY change - otherwise changes won't be visible!
+```bash
+# Local
+sudo systemctl restart fotios-claude-web fotios-claude-daemon
+
+# Remote (when available)
+sshpass -p 'PASSWORD' ssh -o StrictHostKeyChecking=no root@REMOTE_IP "systemctl restart fotios-claude-web fotios-claude-daemon"
+```
+
+### 5. Update version numbers
 - `VERSION` - Single source of truth for version
 - `README.md` - Badge version and zip filename
 - `INSTALL.md` - Zip filename and footer version
 - `CHANGELOG.md` - New entry at the top
 
-### 5. Create NEW zip (DON'T DELETE THE OLD ONE!)
+### 6. Create NEW zip (DON'T DELETE THE OLD ONE!)
 ```bash
 cd /home/claude
 # DON'T rm the old zip! It's a backup!
@@ -49,17 +69,26 @@ The correct names are:
 - `fotios-claude-web` (NOT fotios-web)
 - `fotios-claude-daemon` (NOT fotios-daemon)
 
-## Check Sync with Production
+## Check Sync (Local Source vs Local Prod vs Remote Prod)
 
 ```bash
+# Local Source vs Local Production
 diff /home/claude/fotios-claude-system/web/app.py /opt/fotios-claude/web/app.py
 diff /home/claude/fotios-claude-system/scripts/claude-daemon.py /opt/fotios-claude/scripts/claude-daemon.py
+
+# Local Source vs Remote Production (when remote available)
+sshpass -p 'PASSWORD' ssh -o StrictHostKeyChecking=no root@REMOTE_IP "cat /opt/fotios-claude/web/app.py" | diff /home/claude/fotios-claude-system/web/app.py -
+sshpass -p 'PASSWORD' ssh -o StrictHostKeyChecking=no root@REMOTE_IP "cat /opt/fotios-claude/scripts/claude-daemon.py" | diff /home/claude/fotios-claude-system/scripts/claude-daemon.py -
 ```
 
 ## Check Services
 
 ```bash
+# Local
 systemctl status fotios-claude-web fotios-claude-daemon
+
+# Remote (when available)
+sshpass -p 'PASSWORD' ssh -o StrictHostKeyChecking=no root@REMOTE_IP "systemctl is-active fotios-claude-web fotios-claude-daemon"
 ```
 
 ## Version History
@@ -100,5 +129,5 @@ For helping users design projects:
 ```
 
 ---
-**Last updated:** 2026-01-10
+**Last updated:** 2026-01-11
 **Version:** 2.32.0

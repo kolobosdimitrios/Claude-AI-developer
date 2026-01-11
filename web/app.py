@@ -6,7 +6,12 @@ Fotios Claude Admin Panel v2
 - Background daemon control
 """
 
-VERSION = "2.33.0"
+# Read version from file
+try:
+    with open('/opt/fotios-claude/VERSION', 'r') as f:
+        VERSION = f.read().strip()
+except:
+    VERSION = "unknown"
 
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, send_file
 from flask_socketio import SocketIO, emit, join_room, leave_room
@@ -73,6 +78,10 @@ app = Flask(__name__)
 app.secret_key = os.urandom(24)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading', allow_upgrades=False)
+
+@app.context_processor
+def inject_version():
+    return {'version': VERSION}
 
 def load_config():
     config = {}
@@ -3087,10 +3096,31 @@ class ActivationSession:
     def send_input(self, data):
         if self.fd and self.running:
             try:
+                # Check if user is entering an API key
+                if isinstance(data, str) and data.strip().startswith('sk-ant-'):
+                    self._save_api_key(data.strip().split('\n')[0].split('\r')[0])
                 os.write(self.fd, data.encode() if isinstance(data, str) else data)
                 return True
             except: pass
         return False
+
+    def _save_api_key(self, api_key):
+        """Save API key to .env file for daemon to use"""
+        try:
+            env_dir = os.path.join(self.user_home, ".claude")
+            os.makedirs(env_dir, exist_ok=True)
+            env_file = os.path.join(env_dir, ".env")
+            with open(env_file, 'w') as f:
+                f.write(f"ANTHROPIC_API_KEY={api_key}\n")
+            # Set proper ownership
+            username = os.path.basename(self.user_home)
+            try:
+                pw = pwd.getpwnam(username)
+                os.chown(env_file, pw.pw_uid, pw.pw_gid)
+                os.chmod(env_file, 0o600)
+            except: pass
+        except Exception as e:
+            pass  # Silent fail
 
     def resize(self, rows, cols):
         if self.fd:
@@ -3110,7 +3140,28 @@ class ActivationSession:
             except: pass
 
     def is_activated(self):
-        return os.path.exists(os.path.join(self.user_home, ".claude/.credentials.json"))
+        # Check for OAuth credentials OR API key in .env
+        creds_file = os.path.join(self.user_home, ".claude/.credentials.json")
+        env_file = os.path.join(self.user_home, ".claude/.env")
+        if os.path.exists(creds_file):
+            return True
+        if os.path.exists(env_file):
+            try:
+                with open(env_file, 'r') as f:
+                    content = f.read()
+                    if 'ANTHROPIC_API_KEY=sk-ant-' in content:
+                        return True
+            except: pass
+        # Also check .claude.json for oauthAccount
+        claude_json = os.path.join(self.user_home, ".claude.json")
+        if os.path.exists(claude_json):
+            try:
+                with open(claude_json, 'r') as f:
+                    config = json.load(f)
+                    if 'oauthAccount' in config:
+                        return True
+            except: pass
+        return False
 
 
 class ClaudeChatSession:
@@ -3149,6 +3200,17 @@ class ClaudeChatSession:
                 'HOME': self.user_home, 'USER': username, 'LOGNAME': username,
                 'TERM': 'xterm-256color', 'SHELL': '/bin/bash',
             })
+            # Load API key from .env if exists
+            env_file = os.path.join(self.user_home, ".claude/.env")
+            if os.path.exists(env_file):
+                try:
+                    with open(env_file, 'r') as f:
+                        for line in f:
+                            line = line.strip()
+                            if '=' in line and not line.startswith('#'):
+                                key, value = line.split('=', 1)
+                                env[key] = value
+                except: pass
             os.chdir(self.user_home)
             os.execvpe(claude_path, [claude_path, '--dangerously-skip-permissions', '--model', model], env)
         else:
@@ -3290,6 +3352,7 @@ def claude_activate_stop(session_id):
 def claude_deactivate():
     creds = os.path.join(CLAUDE_USER_HOME, ".claude/.credentials.json")
     env_file = os.path.join(CLAUDE_USER_HOME, ".claude/.env")
+    claude_json = os.path.join(CLAUDE_USER_HOME, ".claude.json")
     removed = []
     try:
         if os.path.exists(creds):
@@ -3298,6 +3361,15 @@ def claude_deactivate():
         if os.path.exists(env_file):
             os.remove(env_file)
             removed.append('env')
+        # Also remove OAuth from .claude.json
+        if os.path.exists(claude_json):
+            with open(claude_json, 'r') as f:
+                config = json.load(f)
+            if 'oauthAccount' in config:
+                del config['oauthAccount']
+                with open(claude_json, 'w') as f:
+                    json.dump(config, f, indent=2)
+                removed.append('oauth')
         return jsonify({'success': True, 'message': f'Removed: {", ".join(removed)}' if removed else 'No credentials'})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})

@@ -16,6 +16,30 @@ Notes for Claude when working on the Fotios Claude System. Reference this file f
 | Config | `/home/claude/fotios-claude-system/config/` | `/opt/fotios-claude/config/` |
 | Scripts | `/home/claude/fotios-claude-system/scripts/` | `/opt/fotios-claude/scripts/` |
 
+### Remote Server (Optional)
+
+```
+Remote server is not always available.
+User will provide IP and credentials when needed.
+Production path: /opt/fotios-claude/
+```
+
+**Sync to Remote:** (replace REMOTE_IP and PASSWORD with values from user)
+```bash
+sshpass -p 'PASSWORD' scp -o StrictHostKeyChecking=no /home/claude/fotios-claude-system/web/app.py root@REMOTE_IP:/opt/fotios-claude/web/
+sshpass -p 'PASSWORD' scp -o StrictHostKeyChecking=no /home/claude/fotios-claude-system/scripts/claude-daemon.py root@REMOTE_IP:/opt/fotios-claude/scripts/
+```
+
+**Check Remote Sync:**
+```bash
+sshpass -p 'PASSWORD' ssh -o StrictHostKeyChecking=no root@REMOTE_IP "cat /opt/fotios-claude/scripts/claude-daemon.py" | diff /home/claude/fotios-claude-system/scripts/claude-daemon.py -
+```
+
+**Restart Remote Services:**
+```bash
+sshpass -p 'PASSWORD' ssh -o StrictHostKeyChecking=no root@REMOTE_IP "systemctl restart fotios-claude-web fotios-claude-daemon"
+```
+
 ### Services
 
 ```bash
@@ -82,7 +106,9 @@ sudo cp -r /home/claude/fotios-claude-system/web/templates/* /opt/fotios-claude/
 sudo cp /home/claude/fotios-claude-system/scripts/*.sh /opt/fotios-claude/scripts/
 ```
 
-### 3. Restart Services
+### 3. Restart Services (ALWAYS!)
+
+**IMPORTANT:** Always restart services after ANY change - otherwise changes won't be visible!
 
 ```bash
 sudo systemctl restart fotios-claude-web fotios-claude-daemon
@@ -272,15 +298,16 @@ mysql -u claude_user -p claude_knowledge -e "SELECT * FROM tickets ORDER BY id D
 
 ## Tips
 
-1. Always read files before editing
-2. Test changes locally before deploying
-3. Check service status after restart
-4. Keep old zip files as backups
-5. Update CHANGELOG for every release
-6. Broadcast to both ticket room AND console room for real-time updates
-7. Use `select.select()` for non-blocking I/O in daemon
+1. **ALWAYS restart services after changes** - changes won't be visible without restart!
+2. Always read files before editing
+3. Test changes locally before deploying
+4. Check service status after restart
+5. Keep old zip files as backups
+6. Update CHANGELOG for every release
+7. Broadcast to both ticket room AND console room for real-time updates
+8. Use `select.select()` for non-blocking I/O in daemon
 
 ---
 
-*Last Updated: 2026-01-10*
+*Last Updated: 2026-01-11*
 *Current Version: 2.33.0*
