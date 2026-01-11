@@ -480,15 +480,14 @@
         </div>
     </div>
 
-    {% if ticket.status == 'awaiting_input' %}
-    <div class="closed-banner" style="background:rgba(139, 92, 246, 0.1);border-color:rgba(139, 92, 246, 0.2)">
+    <div id="awaiting-banner" class="closed-banner" style="background:rgba(139, 92, 246, 0.1);border-color:rgba(139, 92, 246, 0.2);display:{% if ticket.status == 'awaiting_input' %}block{% else %}none{% endif %}">
         Awaiting Input - Claude finished, send a message to continue or close the ticket
         {% if ticket.review_deadline %}
         <span style="margin-left:15px;color:var(--text-muted);font-size:12px">Auto-closes: {{ ticket.review_deadline.strftime('%Y-%m-%d %H:%M') }}</span>
         {% endif %}
         <button onclick="closeTicket('completed')" style="float:right;padding:8px 20px;border:none;border-radius:6px;cursor:pointer;background:var(--accent-secondary);color:white;font-weight:600">Close Ticket</button>
     </div>
-    {% elif ticket.status == 'skipped' %}
+    {% if ticket.status == 'skipped' %}
     <div class="closed-banner" style="background:rgba(245, 158, 11, 0.1);border-color:rgba(245, 158, 11, 0.2)">
         Ticket paused - send a message to continue
         <button onclick="closeTicket('completed')" style="float:right;padding:8px 20px;border:none;border-radius:6px;cursor:pointer;background:var(--bg-card);color:var(--text-primary);font-weight:600">Close Ticket</button>
@@ -593,6 +592,13 @@
             </div>
             {% endif %}
 
+            <div id="message-queue" style="display:none;background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.3);border-radius:8px;padding:10px 14px;margin-bottom:10px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                    <span style="font-size:11px;color:var(--accent-secondary);font-weight:600">📨 Queued messages (waiting for AI to finish):</span>
+                    <button onclick="clearQueue()" style="background:transparent;border:none;color:#ef4444;cursor:pointer;font-size:12px;padding:2px 6px" title="Delete all queued messages">🗑 Delete</button>
+                </div>
+                <div id="queue-content" style="color:var(--text-primary);font-size:13px"></div>
+            </div>
             <div class="input-area">
                 <input type="text" id="message-input" placeholder="Send a message to Claude..."
                        {% if ticket.status in ['done', 'failed'] %}disabled{% endif %} />
@@ -750,21 +756,48 @@
             const id = parseInt(el.dataset.messageId);
             if (id) shownMessageIds.add(id);
         });
-        let lastUserMessageTime = 0;
 
         socket.on('new_message', (msg) => {
             if (msg.ticket_id === ticketId) {
                 if (msg.id && shownMessageIds.has(msg.id)) return;
-                if (msg.role === 'user' && Date.now() - lastUserMessageTime < 3000) return;
+
+                // Skip duplicate of optimistic message
+                if (msg.role === 'user' && pendingUserMessage && msg.content === pendingUserMessage) {
+                    pendingUserMessage = null;
+                    if (msg.id) shownMessageIds.add(msg.id);
+                    return;
+                }
+
                 addMessage(msg);
             }
         });
 
         socket.on('ticket_closed', (data) => { if (data.ticket_id === ticketId) location.reload(); });
 
+        socket.on('ticket_status', (data) => {
+            if (data.ticket_id === ticketId) {
+                currentStatus = data.status;  // Update current status
+
+                // Update status badge
+                const badge = document.querySelector('.status-badge');
+                if (badge) {
+                    badge.className = 'status-badge ' + data.status;
+                    badge.textContent = data.status.replace('_', ' ');
+                }
+                // Show/hide awaiting banner
+                const awaitingBanner = document.getElementById('awaiting-banner');
+                if (awaitingBanner) {
+                    awaitingBanner.style.display = data.status === 'awaiting_input' ? 'block' : 'none';
+                }
+                // When AI finishes and there are queued messages, send them as one combined message
+                if (data.status === 'awaiting_input' && queuedMessages.length > 0) {
+                    sendQueuedMessages();
+                }
+            }
+        });
+
         function addMessage(msg) {
             if (msg.id) shownMessageIds.add(msg.id);
-            if (msg.role === 'user') lastUserMessageTime = Date.now();
 
             const empty = conversation.querySelector('.empty');
             if (empty) empty.remove();
@@ -823,15 +856,31 @@
             return div.innerHTML;
         }
 
+        let pendingUserMessage = null;  // Track message we just sent
+        let currentStatus = '{{ ticket.status }}';  // Track ticket status
+        let queuedMessages = [];  // Store queued messages (not sent yet)
+
         async function sendMessage() {
             const message = input.value.trim();
             if (!message) return;
 
-            addMessage({ role: 'user', content: message, created_at: new Date().toISOString() });
-
             input.value = '';
+
+            // If AI is working (in_progress), queue locally (don't send yet)
+            if (currentStatus === 'in_progress') {
+                queuedMessages.push(message);
+                updateQueueDisplay();
+                input.focus();
+                return;
+            }
+
+            // Normal send
             input.disabled = true;
             document.getElementById('send-btn').disabled = true;
+
+            // Show message immediately in conversation
+            addMessage({ role: 'user', content: message, created_at: new Date().toISOString() });
+            pendingUserMessage = message;
 
             try {
                 const resp = await fetch(`/api/ticket/${ticketId}/send`, {
@@ -840,8 +889,11 @@
                     body: JSON.stringify({message})
                 });
                 const result = await resp.json();
-                if (result.success && result.message && result.message.includes('closed')) location.reload();
-                else if (!result.success) alert('Error: ' + result.message);
+                if (result.success) {
+                    if (result.message && result.message.includes('closed')) location.reload();
+                } else {
+                    alert('Error: ' + result.message);
+                }
             } catch (e) { alert('Error sending message'); }
 
             input.disabled = false;
@@ -849,7 +901,54 @@
             input.focus();
         }
 
+        function updateQueueDisplay() {
+            const queueEl = document.getElementById('message-queue');
+            const queueContent = document.getElementById('queue-content');
+            if (queuedMessages.length === 0) {
+                queueEl.style.display = 'none';
+                queueContent.innerHTML = '';
+            } else {
+                queueEl.style.display = 'block';
+                queueContent.innerHTML = queuedMessages.map((msg, i) =>
+                    `<div style="padding:6px 0;${i < queuedMessages.length - 1 ? 'border-bottom:1px solid rgba(139,92,246,0.2)' : ''}">${escapeHtml(msg)}</div>`
+                ).join('');
+            }
+        }
+
         function sendCommand(cmd) { input.value = cmd; sendMessage(); }
+
+        function clearQueue() {
+            queuedMessages = [];
+            updateQueueDisplay();
+        }
+
+        async function sendQueuedMessages() {
+            if (queuedMessages.length === 0) return;
+
+            // Combine all messages into one
+            const combinedMessage = queuedMessages.join('\n\n');
+            queuedMessages = [];
+            updateQueueDisplay();
+
+            // Show in conversation
+            addMessage({ role: 'user', content: combinedMessage, created_at: new Date().toISOString() });
+            pendingUserMessage = combinedMessage;
+
+            // Send to server
+            try {
+                const resp = await fetch(`/api/ticket/${ticketId}/send`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({message: combinedMessage})
+                });
+                const result = await resp.json();
+                if (!result.success) {
+                    alert('Error sending queued messages: ' + result.message);
+                }
+            } catch (e) {
+                alert('Error sending queued messages');
+            }
+        }
 
         function seeWithEyes() {
             const previewUrl = '{{ ticket.preview_url or "" }}';

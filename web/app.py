@@ -1907,7 +1907,7 @@ def create_ticket_summary(ticket_id):
             saved = tokens_before - tokens_after
             return jsonify({
                 'success': True,
-                'message': f'Summary created! Compressed {len(messages)} messages. Saved ~{saved} tokens ({tokens_before} → {tokens_after})',
+                'message': f'Summary created! Compressed {len(messages)} messages.',
                 'tokens_before': tokens_before,
                 'tokens_after': tokens_after,
                 'messages_summarized': len(messages)
@@ -3000,20 +3000,19 @@ def internal_broadcast():
     data = request.get_json()
     msg_type = data.get('type')
     ticket_id = data.get('ticket_id')
-    print(f"[Broadcast] type={msg_type}, ticket_id={ticket_id}")
 
     if msg_type == 'message' and ticket_id:
         msg = data.get('message', {})
         if msg.get('tool_input') and isinstance(msg['tool_input'], str):
             try: msg['tool_input'] = json.loads(msg['tool_input'])
             except: pass
-        print(f"[Broadcast] Emitting to room ticket_{ticket_id}: role={msg.get('role')}")
         socketio.emit('new_message', msg, room=f'ticket_{ticket_id}')
 
     elif msg_type == 'status' and ticket_id:
+        status = data.get('status')
         socketio.emit('ticket_status', {
-            'ticket_id': ticket_id,
-            'status': data.get('status')
+            'ticket_id': int(ticket_id),
+            'status': status
         }, room=f'ticket_{ticket_id}')
 
     return jsonify({'success': True})

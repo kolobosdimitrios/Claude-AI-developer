@@ -5,6 +5,27 @@ All notable changes to the Fotios Claude System will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.41.0] - 2026-01-11
+
+### Added
+- **Message Queue**: Messages sent while AI is working are queued and combined
+  - Multiple messages collected in visible queue box
+  - Combined into single message when AI finishes
+  - Delete button to clear queue before sending
+  - No more lost messages during AI execution
+- **Real-time Status Updates**: Ticket status changes broadcast via WebSocket
+  - Status badge updates automatically
+  - "Awaiting Input" banner appears when AI finishes
+  - No manual refresh needed
+
+### Changed
+- **Visual Verification promoted**: Added to README and website as key feature
+  - "Claude sees what you see" - screenshot analysis with Playwright
+
+### Fixed
+- **Duplicate messages**: Fixed messages appearing twice in conversation
+- **Removed debug logging**: Cleaned up console.log and print statements
+
 ## [2.40.1] - 2026-01-11
 
 ### Added

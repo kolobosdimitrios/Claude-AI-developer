@@ -238,8 +238,10 @@ class ProjectWorker(threading.Thread):
         try:
             conn = self.get_db()
             cursor = conn.cursor()
+            actual_status = status
             if status == 'done':
                 # Set to awaiting_input instead of done - user must respond or close
+                actual_status = 'awaiting_input'
                 cursor.execute("""
                     UPDATE tickets SET status = 'awaiting_input', result_summary = %s,
                     review_deadline = DATE_ADD(NOW(), INTERVAL 7 DAY), updated_at = NOW()
@@ -253,8 +255,28 @@ class ProjectWorker(threading.Thread):
             conn.commit()
             cursor.close()
             conn.close()
+
+            # Broadcast status change to web UI
+            self.broadcast_status(ticket_id, actual_status)
         except Exception as e:
             self.log(f"Error updating ticket: {e}", "ERROR")
+
+    def broadcast_status(self, ticket_id, status):
+        """Broadcast ticket status change to web app"""
+        try:
+            data = json.dumps({
+                'type': 'status',
+                'ticket_id': ticket_id,
+                'status': status
+            }).encode('utf-8')
+            req = urllib.request.Request(
+                f"{WEB_APP_URL}/api/internal/broadcast",
+                data=data,
+                headers={'Content-Type': 'application/json'}
+            )
+            urllib.request.urlopen(req, timeout=2)
+        except Exception as e:
+            pass  # Silent fail - not critical
 
     def create_backup(self, ticket_id):
         """Create automatic backup before processing ticket"""
