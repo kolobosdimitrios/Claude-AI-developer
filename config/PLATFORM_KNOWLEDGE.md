@@ -180,6 +180,74 @@ Instant control while Claude is working:
 
 ---
 
+## Available Multimedia & Processing Tools
+
+The platform includes powerful tools for image, audio, video, and document processing. Use these to help users with multimedia tasks.
+
+### Image Processing
+| Command | Description | Example |
+|---------|-------------|---------|
+| `convert` | ImageMagick - resize, crop, convert formats | `convert input.png -resize 50% output.jpg` |
+| `identify` | Get image info | `identify image.png` |
+| `optipng` | Optimize PNG | `optipng -o7 image.png` |
+| `jpegoptim` | Optimize JPEG | `jpegoptim --max=85 image.jpg` |
+| `cwebp` | Convert to WebP | `cwebp input.png -o output.webp` |
+| `rsvg-convert` | SVG to PNG/PDF | `rsvg-convert -w 1024 input.svg -o output.png` |
+| `vips` | Fast image processing | `vips resize input.jpg output.jpg 0.5` |
+
+### OCR (Image to Text)
+| Command | Description | Example |
+|---------|-------------|---------|
+| `tesseract` | Extract text from images | `tesseract image.png output -l eng` |
+| `tesseract` | Greek OCR | `tesseract image.png output -l ell` |
+| `tesseract` | Multiple languages | `tesseract image.png output -l eng+ell` |
+
+### PDF Processing
+| Command | Description | Example |
+|---------|-------------|---------|
+| `pdftotext` | PDF to text | `pdftotext input.pdf output.txt` |
+| `pdftoppm` | PDF to images | `pdftoppm -png input.pdf output` |
+| `gs` | Ghostscript - compress PDF | `gs -sDEVICE=pdfwrite -dPDFSETTINGS=/ebook -o out.pdf in.pdf` |
+| `qpdf` | PDF transformations | `qpdf --rotate=90:1-5 input.pdf output.pdf` |
+
+### Audio Processing
+| Command | Description | Example |
+|---------|-------------|---------|
+| `ffmpeg` | Convert audio | `ffmpeg -i input.wav output.mp3` |
+| `sox` | Audio effects | `sox input.wav output.wav reverse` |
+| `sox` | Get audio info | `sox --info audio.mp3` |
+| `sox` | Trim audio | `sox input.wav output.wav trim 0 30` |
+
+### Video Processing
+| Command | Description | Example |
+|---------|-------------|---------|
+| `ffmpeg` | Convert video | `ffmpeg -i input.mp4 output.webm` |
+| `ffmpeg` | Extract audio | `ffmpeg -i video.mp4 -vn audio.mp3` |
+| `ffmpeg` | Create thumbnail | `ffmpeg -i video.mp4 -ss 00:00:05 -frames:v 1 thumb.jpg` |
+| `ffmpeg` | Resize video | `ffmpeg -i input.mp4 -vf scale=1280:720 output.mp4` |
+| `mediainfo` | Get media info | `mediainfo video.mp4` |
+
+### Python Libraries
+```python
+# Image processing
+from PIL import Image
+import cv2  # OpenCV
+
+# OCR
+import pytesseract
+text = pytesseract.image_to_string(Image.open('image.png'), lang='eng+ell')
+
+# PDF to images
+from pdf2image import convert_from_path
+images = convert_from_path('document.pdf')
+
+# Audio
+from pydub import AudioSegment
+audio = AudioSegment.from_mp3("input.mp3")
+```
+
+---
+
 ## Development Workflow
 
 ### Making Changes

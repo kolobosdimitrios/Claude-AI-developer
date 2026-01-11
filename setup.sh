@@ -121,6 +121,16 @@ echo -e "${YELLOW}[2/14] Installing system dependencies...${NC}"
 apt-get update || true
 apt-get install -y python3 python3-pip openssl sudo wget curl gnupg lsb-release git || true
 
+# Multimedia & Processing Tools (for AI capabilities)
+echo "Installing multimedia tools..."
+apt-get install -y ffmpeg imagemagick tesseract-ocr tesseract-ocr-eng tesseract-ocr-ell \
+    poppler-utils ghostscript sox mediainfo webp optipng jpegoptim \
+    librsvg2-bin libvips-tools qpdf || true
+
+# Python multimedia libraries
+pip3 install --ignore-installed Pillow opencv-python-headless pydub pytesseract pdf2image --break-system-packages 2>&1 || \
+pip3 install --ignore-installed Pillow opencv-python-headless pydub pytesseract pdf2image 2>&1 || true
+
 # =====================================================
 # [3/14] MYSQL
 # =====================================================
@@ -292,6 +302,13 @@ if [ "$MYSQL_CONNECTED" = true ]; then
         if [ -f "${SCRIPT_DIR}/database/schema.sql" ]; then
             $MYSQL_CMD ${DB_NAME} < "${SCRIPT_DIR}/database/schema.sql" 2>/dev/null || true
             echo "Database schema imported"
+
+            # Update admin password from install.conf (schema has default hash)
+            ADMIN_HASH=$(python3 -c "import bcrypt; print(bcrypt.hashpw('${ADMIN_PASSWORD}'.encode(), bcrypt.gensalt()).decode())" 2>/dev/null)
+            if [ -n "$ADMIN_HASH" ]; then
+                $MYSQL_CMD ${DB_NAME} -e "UPDATE developers SET username='${ADMIN_USER}', password_hash='${ADMIN_HASH}' WHERE id=1;" 2>/dev/null || true
+                echo "Admin credentials set from install.conf"
+            fi
         fi
     fi
     echo -e "${GREEN}Database configured (with CREATE DATABASE privileges)${NC}"

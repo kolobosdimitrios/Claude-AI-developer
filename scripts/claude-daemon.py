@@ -361,6 +361,14 @@ class ProjectWorker(threading.Thread):
                 self.log(f"Backup created: {backup_name}")
                 self.save_log('info', f'Auto-backup created: {backup_name}')
 
+                # Notify user in UI
+                self.broadcast_message({
+                    'role': 'system',
+                    'content': f'📦 Backup created: {backup_name}',
+                    'created_at': datetime.now().isoformat(),
+                    'ticket_id': ticket_id
+                })
+
             finally:
                 shutil.rmtree(temp_dir, ignore_errors=True)
 

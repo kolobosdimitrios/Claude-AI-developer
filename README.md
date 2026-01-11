@@ -348,6 +348,7 @@ REVIEW_DEADLINE_DAYS=7
 |----------|-------------|
 | [User Guide](docs/USER_GUIDE.md) | How to use the admin panel (with screenshots) |
 | [VM Installation](docs/VM_INSTALLATION.md) | Install on VMware, Hyper-V, VirtualBox, UTM, Parallels |
+| [Installed Packages](docs/INSTALLED_PACKAGES.md) | All tools & packages (ffmpeg, ImageMagick, OCR, etc.) |
 | [INSTALL.md](INSTALL.md) | Detailed installation guide |
 | [CLAUDE_OPERATIONS.md](CLAUDE_OPERATIONS.md) | System management & troubleshooting |
 | [CHANGELOG.md](CHANGELOG.md) | Version history |

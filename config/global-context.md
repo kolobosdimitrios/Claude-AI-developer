@@ -52,6 +52,18 @@ This context applies to ALL projects processed by Claude.
 - mysql-connector-python
 - bcrypt, eventlet
 - Playwright (Python) with Chromium browser
+- Pillow, OpenCV (opencv-python-headless)
+- pytesseract, pdf2image, pydub
+
+### Multimedia Tools
+- **ffmpeg**: Video/audio conversion, editing, streaming
+- **ImageMagick**: Image conversion, resize, crop, effects
+- **tesseract-ocr**: OCR (English + Greek) - extract text from images
+- **sox**: Audio processing and effects
+- **poppler-utils**: PDF tools (pdftotext, pdftoppm)
+- **ghostscript**: PDF manipulation
+- **mediainfo**: Media file information
+- **optipng, jpegoptim, webp**: Image optimization
 
 ### Java
 - GraalVM 24 (JAVA_HOME=/opt/graalvm)
@@ -135,4 +147,53 @@ python3 -c "from playwright.sync_api import sync_playwright; print('Playwright O
 
 # Check MySQL
 mysql --version
+
+# Check multimedia tools
+ffmpeg -version | head -1
+convert -version | head -1
+tesseract --version | head -1
+```
+
+## Multimedia Examples
+
+```bash
+# Convert image format
+convert input.png output.jpg
+
+# Resize image to 50%
+convert input.png -resize 50% output.png
+
+# OCR - extract text from image
+tesseract image.png output -l eng+ell
+
+# Convert video
+ffmpeg -i input.mp4 output.webm
+
+# Extract audio from video
+ffmpeg -i video.mp4 -vn audio.mp3
+
+# PDF to text
+pdftotext document.pdf output.txt
+
+# PDF to images
+pdftoppm -png document.pdf output
+```
+
+```python
+# Python: Image processing
+from PIL import Image
+img = Image.open('input.png')
+img.thumbnail((800, 600))
+img.save('output.jpg')
+
+# Python: OCR
+import pytesseract
+from PIL import Image
+text = pytesseract.image_to_string(Image.open('image.png'), lang='eng+ell')
+
+# Python: PDF to images
+from pdf2image import convert_from_path
+images = convert_from_path('document.pdf')
+for i, img in enumerate(images):
+    img.save(f'page_{i}.png')
 ```
