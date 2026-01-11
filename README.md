@@ -5,32 +5,27 @@
 <h1 align="center">Fotios Claude System</h1>
 
 <p align="center">
-  <strong>Self-hosted AI Coding Agent | Long-Running Unattended Development | Master Code From a New Perspective</strong>
+  <strong>Not an AI that answers questions. An AI that builds software.</strong>
 </p>
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License"></a>
-  <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-2.37.1-green.svg" alt="Version"></a>
+  <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-2.38.0-green.svg" alt="Version"></a>
   <img src="https://img.shields.io/badge/Ubuntu-22.04%20|%2024.04-orange.svg" alt="Ubuntu">
   <a href="https://anthropic.com"><img src="https://img.shields.io/badge/Powered%20by-Claude%20AI-blueviolet.svg" alt="Claude AI"></a>
   <a href="https://github.com/fotsakir/Claude-AI-developer/stargazers"><img src="https://img.shields.io/github/stars/fotsakir/Claude-AI-developer?style=social" alt="Stars"></a>
 </p>
 
-> **Set it. Forget it. Wake up to working code.** An AI agent that works for hours unattended, writing production code while you sleep, eat, or focus on what matters.
+> **This is not an AI that answers questions. It builds software.**
 
-Fotios Claude System is a **self-hosted platform for long-running, unattended AI development**. Unlike chat-based AI tools that need constant hand-holding, this system lets Claude work independently for hours - processing tickets, writing code, and building features while you're away. It's a **new way to master development**: you architect, you direct, Claude executes. Perfect for developers who want to multiply their output without multiplying their hours.
+Instead of chatting back and forth, this AI works inside a real development environment. Describe what you want, and it plans the project, writes code, and tracks its own progress — like a developer on your team.
 
----
+What makes it different is **control**. It understands your whole project, uses only the files it needs, avoids loops, and stops itself when something goes wrong.
 
-## A New Way to Master Development
+For beginners, it removes complexity.
+For developers, it removes noise.
 
-> **Stop babysitting AI. Start directing it.**
-
-Traditional AI coding assistants require you to sit there, prompting, reviewing, prompting again. That's not leverage - that's just typing with extra steps.
-
-Fotios Claude System flips the script: **you become the architect, Claude becomes your development team**. Write a ticket describing what you need. Walk away. Come back to find working code, tests, and documentation. This is development mastery from a completely new angle - you focus on the *what* and *why*, while AI handles the *how*.
-
-This isn't about replacing developers. It's about **amplifying what you can accomplish** in a day, a week, a lifetime.
+**Download it. Let it build.**
 
 ---
 
@@ -173,7 +168,7 @@ Full Linux terminal in your browser:
 ```bash
 # Download, extract, and run
 cd /root
-unzip fotios-claude-system-2.37.1.zip
+unzip fotios-claude-system-2.38.0.zip
 cd fotios-claude-system
 chmod +x setup.sh && ./setup.sh
 
@@ -193,7 +188,7 @@ The installer automatically sets up:
 ```bash
 # Download new version
 cd /root
-unzip fotios-claude-system-2.37.1.zip
+unzip fotios-claude-system-2.38.0.zip
 cd fotios-claude-system
 
 # Preview changes (recommended)
