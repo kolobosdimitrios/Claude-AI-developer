@@ -107,43 +107,26 @@ echo ""
 echo "[5/5] Installing software (15-20 minutes)..."
 echo ""
 
-LAST_LINE=0
-while true; do
-    # Show only NEW lines from the log (no clear)
-    CURRENT=$(multipass exec claude-dev -- wc -l /var/log/cloud-init-output.log 2>/dev/null | awk '{print $1}')
-    if [ -n "$CURRENT" ] && [ "$CURRENT" -gt "$LAST_LINE" ] 2>/dev/null; then
-        multipass exec claude-dev -- tail -n +$((LAST_LINE + 1)) /var/log/cloud-init-output.log 2>/dev/null | head -n $((CURRENT - LAST_LINE))
-        LAST_LINE=$CURRENT
-    fi
+# Just tail -f the log - it will keep running until we kill it
+multipass exec claude-dev -- tail -f /var/log/cloud-init-output.log 2>/dev/null &
+TAIL_PID=$!
 
-    # Check if install completed
-    if multipass exec claude-dev -- test -f /root/install-complete 2>/dev/null; then
-        echo ""
-        echo "Installation complete!"
-        break
-    fi
+# Wait for the launch process to complete (means cloud-init is done)
+wait $LAUNCH_PID
+LAUNCH_EXIT=$?
 
-    # Check if services are running
-    if multipass exec claude-dev -- systemctl is-active codehero-web >/dev/null 2>&1; then
-        echo ""
-        echo "Installation complete!"
-        break
-    fi
+# Kill the tail
+kill $TAIL_PID 2>/dev/null
+wait $TAIL_PID 2>/dev/null
 
-    # Check if launch failed
-    if ! kill -0 $LAUNCH_PID 2>/dev/null; then
-        wait $LAUNCH_PID
-        if [ $? -ne 0 ]; then
-            echo "ERROR: VM creation failed!"
-            exit 1
-        fi
-    fi
+if [ $LAUNCH_EXIT -ne 0 ]; then
+    echo ""
+    echo "ERROR: VM creation failed!"
+    exit 1
+fi
 
-    sleep 3
-done
-
-# Make sure launch process is done
-wait $LAUNCH_PID 2>/dev/null || true
+echo ""
+echo "Installation complete!"
 
 # Get IP address
 IP=$(multipass exec claude-dev -- hostname -I | awk '{print $1}')
