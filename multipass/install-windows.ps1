@@ -1,11 +1,11 @@
-# Fotios Claude System - Windows Installer
+# CodeHero - Windows Installer
 # Run this script as Administrator (Right-click > Run as Administrator)
 
 $ErrorActionPreference = "Stop"
 
 Write-Host ""
 Write-Host "==========================================" -ForegroundColor Cyan
-Write-Host "  Fotios Claude System - Windows Setup   " -ForegroundColor Cyan
+Write-Host "  CodeHero - Windows Setup               " -ForegroundColor Cyan
 Write-Host "==========================================" -ForegroundColor Cyan
 Write-Host ""
 

@@ -1,11 +1,11 @@
-# Fotios Claude System - WSL2 Installer
+# CodeHero - WSL2 Installer
 # Run this script as Administrator (Right-click > Run as Administrator)
 
 $ErrorActionPreference = "Stop"
 
 Write-Host ""
 Write-Host "==========================================" -ForegroundColor Cyan
-Write-Host "  Fotios Claude System - WSL2 Setup      " -ForegroundColor Cyan
+Write-Host "  CodeHero - WSL2 Setup                  " -ForegroundColor Cyan
 Write-Host "==========================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -87,7 +87,7 @@ if ($testResult -match "root") {
 }
 
 # Run the installation inside WSL
-Write-Host "[4/4] Installing Fotios Claude System inside WSL..." -ForegroundColor Yellow
+Write-Host "[4/4] Installing CodeHero inside WSL..." -ForegroundColor Yellow
 Write-Host "      This takes about 10-15 minutes..." -ForegroundColor Gray
 Write-Host ""
 

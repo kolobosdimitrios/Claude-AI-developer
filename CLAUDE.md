@@ -1,4 +1,4 @@
-# Claude Instructions - Fotios Claude System
+# Claude Instructions - CodeHero
 
 **READ THIS BEFORE MAKING ANY CHANGES**
 
@@ -147,5 +147,5 @@ For helping users design projects:
 ```
 
 ---
-**Last updated:** 2026-01-11
-**Version:** 2.32.0
+**Last updated:** 2026-01-12
+**Version:** 2.53.0

@@ -1,6 +1,6 @@
 # Claude Development Notes
 
-Notes for Claude when working on the Fotios Claude System. Reference this file for development workflow.
+Notes for Claude when working on CodeHero. Reference this file for development workflow.
 
 ---
 

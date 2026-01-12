@@ -1,12 +1,12 @@
 #!/bin/bash
-# Fotios Claude System - Linux Installer
+# CodeHero - Linux Installer
 # Run: chmod +x install-linux.sh && ./install-linux.sh
 
 set -e
 
 echo ""
 echo "=========================================="
-echo "  Fotios Claude System - Linux Setup     "
+echo "  CodeHero - Linux Setup                 "
 echo "=========================================="
 echo ""
 

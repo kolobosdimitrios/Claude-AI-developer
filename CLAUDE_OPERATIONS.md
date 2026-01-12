@@ -1,6 +1,6 @@
-# Claude Operations Guide - Fotios Claude System
+# Claude Operations Guide - CodeHero
 
-**This guide is for Claude (AI) to manage and operate the Fotios Claude System platform.**
+**This guide is for Claude (AI) to manage and operate the CodeHero platform.**
 
 ## Quick Reference
 

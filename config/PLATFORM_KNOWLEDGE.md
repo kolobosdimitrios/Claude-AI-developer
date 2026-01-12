@@ -1,4 +1,4 @@
-# Fotios Claude System - Platform Knowledge Base
+# CodeHero - Platform Knowledge Base
 
 **This file is automatically loaded by Claude Assistant to help users with platform questions, troubleshooting, and development.**
 
@@ -6,7 +6,7 @@
 
 ## Platform Overview
 
-Fotios Claude System is a self-hosted autonomous AI coding platform that uses Claude AI to process development tickets. The system consists of:
+CodeHero is a self-hosted autonomous AI coding platform powered by Claude AI to process development tickets. The system consists of:
 
 - **Web App** (Flask + SocketIO) - Admin panel at port 9453
 - **Daemon** - Background worker that processes tickets using Claude Code CLI
@@ -503,5 +503,5 @@ When users ask questions, check these files:
 
 ---
 
-*Last Updated: 2026-01-10*
-*Version: 2.33.0*
+*Last Updated: 2026-01-12*
+*Version: 2.53.0*

@@ -1,11 +1,12 @@
 <p align="center">
-  <img src="assets/logo.svg" alt="Claude AI Developer" width="700">
+  <span style="font-size: 80px;">🦸‍♂️</span>
 </p>
 
-<h1 align="center">Fotios Claude System</h1>
+<h1 align="center">CodeHero</h1>
 
 <p align="center">
-  <strong>Not an AI that answers questions. An AI that builds software.</strong>
+  <strong>The Developer That Never Sleeps</strong><br>
+  <em>Powered by Claude AI</em>
 </p>
 
 <p align="center">

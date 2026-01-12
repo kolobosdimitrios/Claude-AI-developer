@@ -1,5 +1,5 @@
 #cloud-config
-# Fotios Claude System - Automatic Installation
+# CodeHero - Automatic Installation
 # This cloud-init script installs everything automatically
 
 package_update: true
@@ -25,7 +25,7 @@ write_files:
       set -e
 
       echo "=========================================="
-      echo "  Fotios Claude System - Auto Installer  "
+      echo "  CodeHero - Auto Installer              "
       echo "=========================================="
       echo ""
 

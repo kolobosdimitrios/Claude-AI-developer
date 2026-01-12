@@ -1,12 +1,12 @@
 #!/bin/bash
-# Fotios Claude System - macOS Installer
+# CodeHero - macOS Installer
 # Double-click this file to run
 
 set -e
 
 echo ""
 echo "=========================================="
-echo "  Fotios Claude System - macOS Setup     "
+echo "  CodeHero - macOS Setup                 "
 echo "=========================================="
 echo ""
 
