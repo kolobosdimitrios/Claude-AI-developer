@@ -99,6 +99,12 @@ while [ $WAITED -lt $MAX_WAIT ]; do
     sleep $INTERVAL
     WAITED=$((WAITED + INTERVAL))
 
+    # Check if install completed
+    INSTALL_STATUS=$(multipass exec claude-dev -- cat /root/install-complete 2>/dev/null || echo "")
+    if [ "$INSTALL_STATUS" == "done" ]; then
+        break
+    fi
+
     # Check if services are running
     WEB_STATUS=$(multipass exec claude-dev -- systemctl is-active fotios-claude-web 2>/dev/null || echo "inactive")
     if [ "$WEB_STATUS" == "active" ]; then
