@@ -325,32 +325,62 @@ Write-Host ""
 Write-Host "==========================================" -ForegroundColor Green
 Write-Host ""
 
-# Create desktop shortcut
+# Create desktop shortcuts
 $desktopPath = [Environment]::GetFolderPath("Desktop")
-$shortcutPath = Join-Path $desktopPath "Claude AI Developer.url"
 
-$shortcutContent = @"
+# Create a smart batch file that gets IP dynamically
+$startVmPath = Join-Path $desktopPath "Claude AI Developer.bat"
+$startVmContent = @"
+@echo off
+title Claude AI Developer
+echo.
+echo ========================================
+echo   Claude AI Developer
+echo ========================================
+echo.
+
+REM Check if VM is running
+multipass list 2>nul | findstr /C:"claude-dev" | findstr /C:"Running" >nul
+if %ERRORLEVEL% NEQ 0 (
+    echo Starting VM...
+    multipass start claude-dev
+    echo Waiting for VM to boot...
+    timeout /t 10 /nobreak >nul
+)
+
+REM Get IP address
+for /f "tokens=3 delims=," %%a in ('multipass list --format csv 2^>nul ^| findstr /C:"claude-dev"') do set IP=%%a
+
+if "%IP%"=="" (
+    echo ERROR: Could not get VM IP address
+    echo Run: multipass list
+    pause
+    exit /b 1
+)
+
+echo.
+echo Dashboard: https://%IP%:9453
+echo.
+echo Opening browser...
+start https://%IP%:9453
+echo.
+echo Press any key to close this window...
+pause >nul
+"@
+$startVmContent | Out-File -FilePath $startVmPath -Encoding ascii
+Write-Host "Desktop shortcut created: Claude AI Developer.bat" -ForegroundColor Green
+
+# Only create URL shortcut if we have a valid IP
+if ($ip -match "^\d+\.\d+\.\d+\.\d+$") {
+    $shortcutPath = Join-Path $desktopPath "Claude Dashboard.url"
+    $shortcutContent = @"
 [InternetShortcut]
 URL=https://${ip}:9453
 IconIndex=0
 "@
-
-$shortcutContent | Out-File -FilePath $shortcutPath -Encoding ascii
-Write-Host "Desktop shortcut created: Claude AI Developer" -ForegroundColor Green
-
-# Also create a batch file to start the VM
-$startVmPath = Join-Path $desktopPath "Start Claude VM.bat"
-$startVmContent = @"
-@echo off
-echo Starting Claude AI Developer VM...
-multipass start claude-dev
-echo.
-echo VM started! Opening dashboard...
-timeout /t 5 /nobreak >nul
-start https://${ip}:9453
-"@
-$startVmContent | Out-File -FilePath $startVmPath -Encoding ascii
-Write-Host "Desktop shortcut created: Start Claude VM" -ForegroundColor Green
+    $shortcutContent | Out-File -FilePath $shortcutPath -Encoding ascii
+    Write-Host "Desktop shortcut created: Claude Dashboard.url" -ForegroundColor Green
+}
 
 Write-Host ""
 
