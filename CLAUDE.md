@@ -6,7 +6,7 @@
 
 ```
 /home/claude/codehero/    <- LOCAL SOURCE (make changes here)
-/opt/fotios-claude/                   <- LOCAL PRODUCTION (installed files)
+/opt/codehero/                   <- LOCAL PRODUCTION (installed files)
 /home/claude/codehero-X.Y.Z.zip  <- BACKUPS (DON'T DELETE!)
 ```
 
@@ -14,7 +14,7 @@
 ```
 The remote server is not always available.
 User will provide IP/credentials when needed.
-Production path: /opt/fotios-claude/
+Production path: /opt/codehero/
 ```
 
 ## Workflow for Changes
@@ -26,18 +26,18 @@ Production path: /opt/fotios-claude/
 
 ### 2. Copy to PRODUCTION
 ```bash
-sudo cp /home/claude/codehero/web/app.py /opt/fotios-claude/web/
-sudo cp /home/claude/codehero/scripts/claude-daemon.py /opt/fotios-claude/scripts/
-sudo cp -r /home/claude/codehero/web/templates/* /opt/fotios-claude/web/templates/
-sudo cp /home/claude/codehero/scripts/*.sh /opt/fotios-claude/scripts/
+sudo cp /home/claude/codehero/web/app.py /opt/codehero/web/
+sudo cp /home/claude/codehero/scripts/claude-daemon.py /opt/codehero/scripts/
+sudo cp -r /home/claude/codehero/web/templates/* /opt/codehero/web/templates/
+sudo cp /home/claude/codehero/scripts/*.sh /opt/codehero/scripts/
 ```
 
 ### 3. Copy to REMOTE PRODUCTION (when remote server is available)
 ```bash
 # User will provide IP and PASSWORD
-sshpass -p 'PASSWORD' scp -o StrictHostKeyChecking=no /home/claude/codehero/web/app.py root@REMOTE_IP:/opt/fotios-claude/web/
-sshpass -p 'PASSWORD' scp -o StrictHostKeyChecking=no /home/claude/codehero/scripts/claude-daemon.py root@REMOTE_IP:/opt/fotios-claude/scripts/
-sshpass -p 'PASSWORD' scp -o StrictHostKeyChecking=no -r /home/claude/codehero/web/templates/* root@REMOTE_IP:/opt/fotios-claude/web/templates/
+sshpass -p 'PASSWORD' scp -o StrictHostKeyChecking=no /home/claude/codehero/web/app.py root@REMOTE_IP:/opt/codehero/web/
+sshpass -p 'PASSWORD' scp -o StrictHostKeyChecking=no /home/claude/codehero/scripts/claude-daemon.py root@REMOTE_IP:/opt/codehero/scripts/
+sshpass -p 'PASSWORD' scp -o StrictHostKeyChecking=no -r /home/claude/codehero/web/templates/* root@REMOTE_IP:/opt/codehero/web/templates/
 ```
 
 ### 4. Restart services (ALWAYS!) - Both Local and Remote
@@ -91,12 +91,12 @@ The correct names are:
 
 ```bash
 # Local Source vs Local Production
-diff /home/claude/codehero/web/app.py /opt/fotios-claude/web/app.py
-diff /home/claude/codehero/scripts/claude-daemon.py /opt/fotios-claude/scripts/claude-daemon.py
+diff /home/claude/codehero/web/app.py /opt/codehero/web/app.py
+diff /home/claude/codehero/scripts/claude-daemon.py /opt/codehero/scripts/claude-daemon.py
 
 # Local Source vs Remote Production (when remote available)
-sshpass -p 'PASSWORD' ssh -o StrictHostKeyChecking=no root@REMOTE_IP "cat /opt/fotios-claude/web/app.py" | diff /home/claude/codehero/web/app.py -
-sshpass -p 'PASSWORD' ssh -o StrictHostKeyChecking=no root@REMOTE_IP "cat /opt/fotios-claude/scripts/claude-daemon.py" | diff /home/claude/codehero/scripts/claude-daemon.py -
+sshpass -p 'PASSWORD' ssh -o StrictHostKeyChecking=no root@REMOTE_IP "cat /opt/codehero/web/app.py" | diff /home/claude/codehero/web/app.py -
+sshpass -p 'PASSWORD' ssh -o StrictHostKeyChecking=no root@REMOTE_IP "cat /opt/codehero/scripts/claude-daemon.py" | diff /home/claude/codehero/scripts/claude-daemon.py -
 ```
 
 ## Check Services
@@ -120,10 +120,10 @@ The zip files are BACKUPS. Keep them all:
 
 | Source | Production |
 |--------|------------|
-| web/app.py | /opt/fotios-claude/web/app.py |
-| scripts/claude-daemon.py | /opt/fotios-claude/scripts/claude-daemon.py |
-| scripts/change-passwords.sh | /opt/fotios-claude/scripts/change-passwords.sh |
-| web/templates/*.html | /opt/fotios-claude/web/templates/*.html |
+| web/app.py | /opt/codehero/web/app.py |
+| scripts/claude-daemon.py | /opt/codehero/scripts/claude-daemon.py |
+| scripts/change-passwords.sh | /opt/codehero/scripts/change-passwords.sh |
+| web/templates/*.html | /opt/codehero/web/templates/*.html |
 
 ## After Reboot
 

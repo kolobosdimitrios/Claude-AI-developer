@@ -382,7 +382,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Blueprint Planner Improvements**: Updated paths for production deployment
 
 ### Changed
-- **setup.sh**: Now copies all documentation files to /opt/fotios-claude/
+- **setup.sh**: Now copies all documentation files to /opt/codehero/
   - config/*.md files for Claude Assistant
   - CLAUDE_OPERATIONS.md, CLAUDE_DEV_NOTES.md, CLAUDE.md
   - Full docs/ directory with USER_GUIDE.md
@@ -520,7 +520,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - **Password Change Script**: Fixed admin panel password change not working
   - Changed from MySQL root to application user credentials
-  - Now reads from `/etc/fotios-claude/system.conf` (world-readable)
+  - Now reads from `/etc/codehero/system.conf` (world-readable)
   - Properly generates and stores bcrypt password hashes
 
 ### Documentation

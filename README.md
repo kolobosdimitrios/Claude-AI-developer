@@ -224,7 +224,7 @@ Paste → Enter → Wait 15 minutes → Done! [Full guide →](docs/MULTIPASS_IN
 
 **After installation:**
 - Dashboard: `https://VM_IP:9453` (login: admin / admin123)
-- Change passwords: `sudo /opt/fotios-claude/scripts/change-passwords.sh`
+- Change passwords: `sudo /opt/codehero/scripts/change-passwords.sh`
 
 ---
 
@@ -256,7 +256,7 @@ chmod +x setup.sh && ./setup.sh
 ifconfig
 
 # Then install Claude Code CLI
-/opt/fotios-claude/scripts/install-claude-code.sh
+/opt/codehero/scripts/install-claude-code.sh
 ```
 
 The installer automatically sets up:
@@ -385,7 +385,7 @@ claude-cli daemon start|stop|status
 
 ## Configuration
 
-Edit `/etc/fotios-claude/system.conf`:
+Edit `/etc/codehero/system.conf`:
 
 ```bash
 # Database connection
@@ -438,7 +438,7 @@ REVIEW_DEADLINE_DAYS=7
 
 After installation, change default passwords:
 ```bash
-sudo /opt/fotios-claude/scripts/change-passwords.sh
+sudo /opt/codehero/scripts/change-passwords.sh
 ```
 
 ## Contributing

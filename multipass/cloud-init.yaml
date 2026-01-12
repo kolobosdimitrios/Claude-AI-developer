@@ -85,7 +85,7 @@ write_files:
       echo "  Password:  admin123"
       echo ""
       echo "  IMPORTANT: Change passwords after first login:"
-      echo "  sudo /opt/fotios-claude/scripts/change-passwords.sh"
+      echo "  sudo /opt/codehero/scripts/change-passwords.sh"
       echo ""
       echo "  TO ACTIVATE CLAUDE CODE:"
       echo "  1. Open dashboard and click 'Activate Claude'"

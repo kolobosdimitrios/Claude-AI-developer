@@ -31,18 +31,18 @@ CodeHero is a self-hosted autonomous AI coding platform powered by Claude AI to 
 ### Production (Running)
 | Component | Path |
 |-----------|------|
-| Web App | `/opt/fotios-claude/web/app.py` |
-| Daemon | `/opt/fotios-claude/scripts/claude-daemon.py` |
-| Templates | `/opt/fotios-claude/web/templates/*.html` |
-| Config | `/etc/fotios-claude/system.conf` |
-| SSL Certs | `/etc/fotios-claude/ssl/` |
+| Web App | `/opt/codehero/web/app.py` |
+| Daemon | `/opt/codehero/scripts/claude-daemon.py` |
+| Templates | `/opt/codehero/web/templates/*.html` |
+| Config | `/etc/codehero/system.conf` |
+| SSL Certs | `/etc/codehero/ssl/` |
 | Logs | `/var/log/fotios-claude/` |
 
 ### Important Configuration Files
 | File | Purpose |
 |------|---------|
-| `/etc/fotios-claude/system.conf` | Database credentials, MAX_PARALLEL_PROJECTS |
-| `/etc/fotios-claude/global-context.md` | Global context sent to all projects |
+| `/etc/codehero/system.conf` | Database credentials, MAX_PARALLEL_PROJECTS |
+| `/etc/codehero/global-context.md` | Global context sent to all projects |
 | `/home/claude/codehero/config/project-template.md` | Blueprint planner template |
 
 ---
@@ -89,7 +89,7 @@ tail -f /var/log/fotios-claude/web.log
 ### Connection
 ```bash
 # Read credentials from config
-source /etc/fotios-claude/system.conf
+source /etc/codehero/system.conf
 mysql -u $DB_USER -p$DB_PASSWORD $DB_NAME
 
 # Or directly
@@ -259,9 +259,9 @@ audio = AudioSegment.from_mp3("input.mp3")
 
 2. **Deploy to production:**
    ```bash
-   sudo cp /home/claude/codehero/web/app.py /opt/fotios-claude/web/
-   sudo cp /home/claude/codehero/scripts/claude-daemon.py /opt/fotios-claude/scripts/
-   sudo cp -r /home/claude/codehero/web/templates/* /opt/fotios-claude/web/templates/
+   sudo cp /home/claude/codehero/web/app.py /opt/codehero/web/
+   sudo cp /home/claude/codehero/scripts/claude-daemon.py /opt/codehero/scripts/
+   sudo cp -r /home/claude/codehero/web/templates/* /opt/codehero/web/templates/
    ```
 
 3. **Restart services:**
@@ -350,7 +350,7 @@ UPDATE execution_sessions SET status='stuck', ended_at=NOW() WHERE status='runni
 which claude
 
 # If not installed:
-/opt/fotios-claude/scripts/install-claude-code.sh
+/opt/codehero/scripts/install-claude-code.sh
 
 # Check API key
 cat ~/.claude/.credentials.json
@@ -470,7 +470,7 @@ UPDATE execution_sessions SET status='stopped', ended_at=NOW() WHERE status='run
 
 ### Database Backup
 ```bash
-source /etc/fotios-claude/system.conf
+source /etc/codehero/system.conf
 mysqldump -u $DB_USER -p$DB_PASSWORD $DB_NAME > /tmp/backup_$(date +%Y%m%d_%H%M%S).sql
 ```
 

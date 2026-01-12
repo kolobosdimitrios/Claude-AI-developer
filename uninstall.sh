@@ -95,12 +95,12 @@ rm -rf /root/.cache/ms-playwright 2>/dev/null || true
 rm -rf /home/claude/.cache/ms-playwright 2>/dev/null || true
 
 echo -e "${YELLOW}[7/8] Removing application files...${NC}"
-rm -rf /opt/fotios-claude 2>/dev/null || true
+rm -rf /opt/codehero 2>/dev/null || true
 rm -rf /opt/apps 2>/dev/null || true
 rm -rf /var/www/projects 2>/dev/null || true
 rm -rf /var/log/fotios-claude 2>/dev/null || true
 rm -rf /var/run/fotios-claude 2>/dev/null || true
-rm -rf /etc/fotios-claude 2>/dev/null || true
+rm -rf /etc/codehero 2>/dev/null || true
 rm -f /etc/systemd/system/fotios-claude-web.service 2>/dev/null || true
 rm -f /etc/systemd/system/fotios-claude-daemon.service 2>/dev/null || true
 # Remove old service names (for backwards compatibility)

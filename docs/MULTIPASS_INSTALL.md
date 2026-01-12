@@ -212,7 +212,7 @@ You'll see a browser security warning (self-signed certificate). This is normal:
 
 ```bash
 multipass shell claude-dev
-sudo /opt/fotios-claude/scripts/change-passwords.sh
+sudo /opt/codehero/scripts/change-passwords.sh
 ```
 
 ### Activate Claude Code

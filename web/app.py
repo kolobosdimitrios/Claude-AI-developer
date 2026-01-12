@@ -8,7 +8,7 @@ Fotios Claude Admin Panel v2
 
 # Read version from file
 try:
-    with open('/opt/fotios-claude/VERSION', 'r') as f:
+    with open('/opt/codehero/VERSION', 'r') as f:
         VERSION = f.read().strip()
 except:
     VERSION = "unknown"
@@ -44,7 +44,7 @@ import urllib.error
 from datetime import datetime
 from functools import wraps
 import sys
-sys.path.insert(0, '/opt/fotios-claude/scripts')
+sys.path.insert(0, '/opt/codehero/scripts')
 try:
     from smart_context import SmartContextManager
 except ImportError:
@@ -72,8 +72,8 @@ def safe_filename(filename):
         filename = 'file_' + secrets.token_hex(4)
     return filename
 
-CONFIG_FILE = "/etc/fotios-claude/system.conf"
-DAEMON_SCRIPT = "/opt/fotios-claude/scripts/claude-daemon.py"
+CONFIG_FILE = "/etc/codehero/system.conf"
+DAEMON_SCRIPT = "/opt/codehero/scripts/claude-daemon.py"
 PID_FILE = "/var/run/fotios-claude/daemon.pid"
 
 app = Flask(__name__)
@@ -3419,7 +3419,7 @@ def claude_save_apikey():
 def get_settings():
     """Get current settings from system.conf"""
     try:
-        config_file = '/etc/fotios-claude/system.conf'
+        config_file = '/etc/codehero/system.conf'
         settings = {}
         if os.path.exists(config_file):
             with open(config_file, 'r') as f:
@@ -3448,7 +3448,7 @@ def save_settings():
     """Save settings to system.conf"""
     try:
         data = request.get_json() or {}
-        config_file = '/etc/fotios-claude/system.conf'
+        config_file = '/etc/codehero/system.conf'
 
         # Read existing config
         existing = {}

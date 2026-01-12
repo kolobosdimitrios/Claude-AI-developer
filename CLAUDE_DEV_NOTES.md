@@ -10,29 +10,29 @@ Notes for Claude when working on CodeHero. Reference this file for development w
 
 | Purpose | Source (edit here) | Production (deployed) |
 |---------|-------------------|----------------------|
-| Web App | `/home/claude/codehero/web/app.py` | `/opt/fotios-claude/web/app.py` |
-| Daemon | `/home/claude/codehero/scripts/claude-daemon.py` | `/opt/fotios-claude/scripts/claude-daemon.py` |
-| Templates | `/home/claude/codehero/web/templates/*.html` | `/opt/fotios-claude/web/templates/*.html` |
-| Config | `/home/claude/codehero/config/` | `/opt/fotios-claude/config/` |
-| Scripts | `/home/claude/codehero/scripts/` | `/opt/fotios-claude/scripts/` |
+| Web App | `/home/claude/codehero/web/app.py` | `/opt/codehero/web/app.py` |
+| Daemon | `/home/claude/codehero/scripts/claude-daemon.py` | `/opt/codehero/scripts/claude-daemon.py` |
+| Templates | `/home/claude/codehero/web/templates/*.html` | `/opt/codehero/web/templates/*.html` |
+| Config | `/home/claude/codehero/config/` | `/opt/codehero/config/` |
+| Scripts | `/home/claude/codehero/scripts/` | `/opt/codehero/scripts/` |
 
 ### Remote Server (Optional)
 
 ```
 Remote server is not always available.
 User will provide IP and credentials when needed.
-Production path: /opt/fotios-claude/
+Production path: /opt/codehero/
 ```
 
 **Sync to Remote:** (replace REMOTE_IP and PASSWORD with values from user)
 ```bash
-sshpass -p 'PASSWORD' scp -o StrictHostKeyChecking=no /home/claude/codehero/web/app.py root@REMOTE_IP:/opt/fotios-claude/web/
-sshpass -p 'PASSWORD' scp -o StrictHostKeyChecking=no /home/claude/codehero/scripts/claude-daemon.py root@REMOTE_IP:/opt/fotios-claude/scripts/
+sshpass -p 'PASSWORD' scp -o StrictHostKeyChecking=no /home/claude/codehero/web/app.py root@REMOTE_IP:/opt/codehero/web/
+sshpass -p 'PASSWORD' scp -o StrictHostKeyChecking=no /home/claude/codehero/scripts/claude-daemon.py root@REMOTE_IP:/opt/codehero/scripts/
 ```
 
 **Check Remote Sync:**
 ```bash
-sshpass -p 'PASSWORD' ssh -o StrictHostKeyChecking=no root@REMOTE_IP "cat /opt/fotios-claude/scripts/claude-daemon.py" | diff /home/claude/codehero/scripts/claude-daemon.py -
+sshpass -p 'PASSWORD' ssh -o StrictHostKeyChecking=no root@REMOTE_IP "cat /opt/codehero/scripts/claude-daemon.py" | diff /home/claude/codehero/scripts/claude-daemon.py -
 ```
 
 **Restart Remote Services:**
@@ -61,7 +61,7 @@ tail -f /var/log/fotios-claude/web.log
 
 - **Type:** MySQL
 - **Name:** `claude_knowledge`
-- **Config:** `/etc/fotios-claude/system.conf`
+- **Config:** `/etc/codehero/system.conf`
 - **Schema:** `/home/claude/codehero/database/schema.sql`
 - **Migrations:** `/home/claude/codehero/database/migrations/`
 
@@ -94,16 +94,16 @@ Always edit in SOURCE directory:
 
 ```bash
 # Copy app.py
-sudo cp /home/claude/codehero/web/app.py /opt/fotios-claude/web/
+sudo cp /home/claude/codehero/web/app.py /opt/codehero/web/
 
 # Copy daemon
-sudo cp /home/claude/codehero/scripts/claude-daemon.py /opt/fotios-claude/scripts/
+sudo cp /home/claude/codehero/scripts/claude-daemon.py /opt/codehero/scripts/
 
 # Copy templates
-sudo cp -r /home/claude/codehero/web/templates/* /opt/fotios-claude/web/templates/
+sudo cp -r /home/claude/codehero/web/templates/* /opt/codehero/web/templates/
 
 # Copy scripts
-sudo cp /home/claude/codehero/scripts/*.sh /opt/fotios-claude/scripts/
+sudo cp /home/claude/codehero/scripts/*.sh /opt/codehero/scripts/
 ```
 
 ### 3. Restart Services (ALWAYS!)
@@ -316,7 +316,7 @@ mysql -u claude_user -p claude_knowledge -e "SELECT * FROM tickets ORDER BY id D
 ## Files NOT to Delete
 
 - `/home/claude/codehero-*.zip` - Version backups
-- `/etc/fotios-claude/system.conf` - Database credentials
+- `/etc/codehero/system.conf` - Database credentials
 - `/home/claude/.claude/` - Claude CLI config
 
 ---

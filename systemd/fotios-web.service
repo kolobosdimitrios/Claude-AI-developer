@@ -5,9 +5,9 @@ After=network.target mysql.service
 [Service]
 Type=simple
 User=root
-WorkingDirectory=/opt/fotios-claude/web
+WorkingDirectory=/opt/codehero/web
 Environment=PYTHONUNBUFFERED=1
-ExecStart=/usr/bin/python3 /opt/fotios-claude/web/app.py
+ExecStart=/usr/bin/python3 /opt/codehero/web/app.py
 ExecStopPost=/bin/bash -c 'fuser -k 5000/tcp 2>/dev/null || true'
 Restart=always
 RestartSec=5

@@ -20,9 +20,9 @@ NC='\033[0m'
 
 # Paths
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-INSTALL_DIR="/opt/fotios-claude"
+INSTALL_DIR="/opt/codehero"
 BACKUP_DIR="/var/backups/fotios-claude"
-CONFIG_DIR="/etc/fotios-claude"
+CONFIG_DIR="/etc/codehero"
 
 # Options
 DRY_RUN=false

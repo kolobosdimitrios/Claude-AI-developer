@@ -10,7 +10,7 @@
 mysql -u $DB_USER -p$DB_PASSWORD $DB_NAME
 
 # Or read credentials from config
-source /etc/fotios-claude/system.conf 2>/dev/null || source /etc/fotios-claude/credentials.conf
+source /etc/codehero/system.conf 2>/dev/null || source /etc/codehero/credentials.conf
 mysql -u $DB_USER -p$DB_PASSWORD $DB_NAME
 ```
 
@@ -199,13 +199,13 @@ The daemon loads a global context file that provides environment information to 
 
 ### File Location
 ```
-/etc/fotios-claude/global-context.md
+/etc/codehero/global-context.md
 ```
 
 ### How to Edit
 ```bash
 # Edit the global context
-sudo nano /etc/fotios-claude/global-context.md
+sudo nano /etc/codehero/global-context.md
 
 # Changes take effect on next ticket (no restart needed)
 # The daemon reloads on startup, but workers pick up the context when created
@@ -241,12 +241,12 @@ sudo nano /etc/fotios-claude/global-context.md
 ### Components
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| Flask Web App | `/opt/fotios-claude/web/app.py` | Admin panel UI |
-| Daemon | `/opt/fotios-claude/scripts/claude-daemon.py` | Processes tickets with Claude Code |
-| CLI | `/opt/fotios-claude/scripts/claude-cli.py` | Command-line interface |
-| Templates | `/opt/fotios-claude/web/templates/` | HTML templates |
-| Config | `/etc/fotios-claude/system.conf` | System configuration |
-| SSL Certs | `/etc/fotios-claude/ssl/` | SSL certificates |
+| Flask Web App | `/opt/codehero/web/app.py` | Admin panel UI |
+| Daemon | `/opt/codehero/scripts/claude-daemon.py` | Processes tickets with Claude Code |
+| CLI | `/opt/codehero/scripts/claude-cli.py` | Command-line interface |
+| Templates | `/opt/codehero/web/templates/` | HTML templates |
+| Config | `/etc/codehero/system.conf` | System configuration |
+| SSL Certs | `/etc/codehero/ssl/` | SSL certificates |
 
 ### Services
 | Service | Port | Description |
@@ -419,11 +419,11 @@ The daemon (`claude-daemon.py`) is a multi-worker system that:
 ### Worker Configuration
 ```bash
 # Check current max workers (in config)
-grep MAX_PARALLEL /etc/fotios-claude/system.conf
+grep MAX_PARALLEL /etc/codehero/system.conf
 # MAX_PARALLEL_PROJECTS=3
 
 # To change: edit config and restart daemon
-sudo nano /etc/fotios-claude/system.conf
+sudo nano /etc/codehero/system.conf
 sudo systemctl restart fotios-claude-daemon
 ```
 
@@ -492,12 +492,12 @@ sudo systemctl restart fotios-claude-web
 journalctl -u fotios-claude-web -f
 
 # Test Flask directly
-cd /opt/fotios-claude/web && python3 app.py
+cd /opt/codehero/web && python3 app.py
 ```
 
 ### Templates Location
 ```
-/opt/fotios-claude/web/templates/
+/opt/codehero/web/templates/
 ├── login.html              # Login page
 ├── dashboard.html          # Main dashboard with stats
 ├── tickets_list.html       # All tickets with filters
@@ -606,7 +606,7 @@ sudo systemctl status mysql
 mysql -u $DB_USER -p$DB_PASSWORD $DB_NAME -e "SELECT 1"
 
 # 3. Check credentials
-cat /etc/fotios-claude/system.conf | grep DB_
+cat /etc/codehero/system.conf | grep DB_
 
 # 4. Reset password if needed
 sudo mysql -e "ALTER USER 'claude_user'@'localhost' IDENTIFIED BY 'newpassword';"
@@ -704,17 +704,17 @@ When making changes to the platform:
 
 | What | Source (sync here) | Installed (running) |
 |------|-------------------|---------------------|
-| Flask App | `/home/claude/codehero/web/app.py` | `/opt/fotios-claude/web/app.py` |
-| Daemon | `/home/claude/codehero/scripts/claude-daemon.py` | `/opt/fotios-claude/scripts/claude-daemon.py` |
-| Templates | `/home/claude/codehero/web/templates/` | `/opt/fotios-claude/web/templates/` |
+| Flask App | `/home/claude/codehero/web/app.py` | `/opt/codehero/web/app.py` |
+| Daemon | `/home/claude/codehero/scripts/claude-daemon.py` | `/opt/codehero/scripts/claude-daemon.py` |
+| Templates | `/home/claude/codehero/web/templates/` | `/opt/codehero/web/templates/` |
 | Schema | `/home/claude/codehero/database/schema.sql` | (applied to MySQL) |
 
 **After editing:**
 ```bash
 # Copy to installed location
-sudo cp /home/claude/codehero/web/app.py /opt/fotios-claude/web/
-sudo cp -r /home/claude/codehero/web/templates/* /opt/fotios-claude/web/templates/
-sudo cp /home/claude/codehero/scripts/claude-daemon.py /opt/fotios-claude/scripts/
+sudo cp /home/claude/codehero/web/app.py /opt/codehero/web/
+sudo cp -r /home/claude/codehero/web/templates/* /opt/codehero/web/templates/
+sudo cp /home/claude/codehero/scripts/claude-daemon.py /opt/codehero/scripts/
 
 # Restart services
 sudo systemctl restart fotios-claude-web fotios-claude-daemon

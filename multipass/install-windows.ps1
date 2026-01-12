@@ -332,7 +332,7 @@ Write-Host "  VM Shell:   multipass shell claude-dev" -ForegroundColor White
 Write-Host "  VM Status:  multipass list" -ForegroundColor White
 Write-Host ""
 Write-Host "  CHANGE PASSWORDS (after setup completes):" -ForegroundColor Red
-Write-Host "  sudo /opt/fotios-claude/scripts/change-passwords.sh" -ForegroundColor White
+Write-Host "  sudo /opt/codehero/scripts/change-passwords.sh" -ForegroundColor White
 Write-Host ""
 Write-Host "==========================================" -ForegroundColor Green
 Write-Host ""

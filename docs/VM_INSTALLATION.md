@@ -375,7 +375,7 @@ When finished, you'll see the access credentials on screen.
 After setup completes:
 
 ```bash
-/opt/fotios-claude/scripts/install-claude-code.sh
+/opt/codehero/scripts/install-claude-code.sh
 ```
 
 Follow the prompts to authenticate with your Anthropic account.
@@ -399,7 +399,7 @@ Replace `YOUR_VM_IP` with the IP address you noted earlier (e.g., `https://192.1
 
 > **Important**: Change the default passwords after first login:
 > ```bash
-> sudo /opt/fotios-claude/scripts/change-passwords.sh
+> sudo /opt/codehero/scripts/change-passwords.sh
 > ```
 
 ### Browser Security Warning

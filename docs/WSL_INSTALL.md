@@ -174,7 +174,7 @@ Replace `YOUR_IP` with the IP from `hostname -I` (e.g., `https://172.25.123.45:9
 Inside WSL:
 
 ```bash
-/opt/fotios-claude/scripts/change-passwords.sh
+/opt/codehero/scripts/change-passwords.sh
 ```
 
 ### Activate Claude Code

@@ -8,7 +8,7 @@ import sys
 import os
 import mysql.connector
 
-CONFIG_FILE = "/etc/fotios-claude/system.conf"
+CONFIG_FILE = "/etc/codehero/system.conf"
 
 def load_config():
     config = {}

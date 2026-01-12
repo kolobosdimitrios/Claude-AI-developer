@@ -41,10 +41,10 @@ MAX_BACKUPS = 30
 # Web app URL for broadcasting messages
 WEB_APP_URL = "http://127.0.0.1:5000"
 
-CONFIG_FILE = "/etc/fotios-claude/system.conf"
+CONFIG_FILE = "/etc/codehero/system.conf"
 PID_FILE = "/var/run/fotios-claude/daemon.pid"
 LOG_FILE = "/var/log/fotios-claude/daemon.log"
-GLOBAL_CONTEXT_FILE = "/etc/fotios-claude/global-context.md"
+GLOBAL_CONTEXT_FILE = "/etc/codehero/global-context.md"
 STUCK_TIMEOUT_MINUTES = 30
 POLL_INTERVAL = 3
 MAX_PARALLEL_PROJECTS = 3

@@ -129,7 +129,7 @@ This is useful for quickly checking on progress without triggering Claude to wor
 ## Notes
 
 - Notifications are sent instantly when ticket status changes
-- Settings are saved in `/etc/fotios-claude/system.conf`
+- Settings are saved in `/etc/codehero/system.conf`
 - The daemon restarts automatically when you save settings
 - You can disable notifications anytime from the Settings panel
 - Two-way communication polls every 10 seconds

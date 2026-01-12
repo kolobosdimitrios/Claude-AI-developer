@@ -150,7 +150,7 @@ Write-Host "  Stop WSL:       wsl --shutdown" -ForegroundColor White
 Write-Host "  Start services: wsl -d Ubuntu-24.04 --exec systemctl start fotios-claude-web fotios-claude-daemon" -ForegroundColor White
 Write-Host ""
 Write-Host "  CHANGE PASSWORDS:" -ForegroundColor Red
-Write-Host "  wsl -d Ubuntu-24.04 --exec /opt/fotios-claude/scripts/change-passwords.sh" -ForegroundColor White
+Write-Host "  wsl -d Ubuntu-24.04 --exec /opt/codehero/scripts/change-passwords.sh" -ForegroundColor White
 Write-Host ""
 Write-Host "==========================================" -ForegroundColor Green
 Write-Host ""

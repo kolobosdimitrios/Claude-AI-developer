@@ -47,7 +47,7 @@ This installs:
 ### 4. Install Claude Code CLI
 
 ```bash
-/opt/fotios-claude/scripts/install-claude-code.sh
+/opt/codehero/scripts/install-claude-code.sh
 ```
 
 ### 5. Login to Claude Code
@@ -76,7 +76,7 @@ After installation:
 ### Change passwords
 
 ```bash
-sudo /opt/fotios-claude/scripts/change-passwords.sh
+sudo /opt/codehero/scripts/change-passwords.sh
 ```
 
 ### Check services

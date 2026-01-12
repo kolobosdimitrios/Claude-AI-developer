@@ -21,8 +21,8 @@ echo "╚═══════════════════════�
 echo -e "${NC}"
 
 # Load current credentials
-source /etc/fotios-claude/credentials.conf 2>/dev/null || true
-source /etc/fotios-claude/mysql.conf 2>/dev/null || true
+source /etc/codehero/credentials.conf 2>/dev/null || true
+source /etc/codehero/mysql.conf 2>/dev/null || true
 
 echo "Select what to change:"
 echo "  1) MySQL root password"
@@ -52,8 +52,8 @@ change_mysql_root() {
     mysql -u root -p"${CURRENT_PASS}" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${NEW_PASS}';" 2>/dev/null
     if [ $? -eq 0 ]; then
         # Update config files
-        sed -i "s/MYSQL_ROOT_PASSWORD=.*/MYSQL_ROOT_PASSWORD=${NEW_PASS}/" /etc/fotios-claude/mysql.conf
-        sed -i "s/MYSQL_ROOT_PASSWORD=.*/MYSQL_ROOT_PASSWORD=${NEW_PASS}/" /etc/fotios-claude/credentials.conf
+        sed -i "s/MYSQL_ROOT_PASSWORD=.*/MYSQL_ROOT_PASSWORD=${NEW_PASS}/" /etc/codehero/mysql.conf
+        sed -i "s/MYSQL_ROOT_PASSWORD=.*/MYSQL_ROOT_PASSWORD=${NEW_PASS}/" /etc/codehero/credentials.conf
         echo -e "${GREEN}MySQL root password changed successfully${NC}"
     else
         echo -e "${RED}Failed to change MySQL root password${NC}"
@@ -78,9 +78,9 @@ change_mysql_app() {
 
     mysql -u root -p"${CURRENT_ROOT}" -e "ALTER USER '${APP_USER}'@'localhost' IDENTIFIED BY '${NEW_PASS}';" 2>/dev/null
     if [ $? -eq 0 ]; then
-        sed -i "s/MYSQL_APP_PASSWORD=.*/MYSQL_APP_PASSWORD=${NEW_PASS}/" /etc/fotios-claude/mysql.conf
-        sed -i "s/MYSQL_APP_PASSWORD=.*/MYSQL_APP_PASSWORD=${NEW_PASS}/" /etc/fotios-claude/credentials.conf
-        sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=${NEW_PASS}/" /etc/fotios-claude/system.conf
+        sed -i "s/MYSQL_APP_PASSWORD=.*/MYSQL_APP_PASSWORD=${NEW_PASS}/" /etc/codehero/mysql.conf
+        sed -i "s/MYSQL_APP_PASSWORD=.*/MYSQL_APP_PASSWORD=${NEW_PASS}/" /etc/codehero/credentials.conf
+        sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=${NEW_PASS}/" /etc/codehero/system.conf
 
         # Restart services to use new password
         systemctl restart fotios-claude-web 2>/dev/null || true
@@ -115,8 +115,8 @@ ${NEW_PASS}
 EOF
 
     if [ $? -eq 0 ]; then
-        sed -i "s/OLS_ADMIN_USER=.*/OLS_ADMIN_USER=${NEW_USER}/" /etc/fotios-claude/credentials.conf
-        sed -i "s/OLS_ADMIN_PASSWORD=.*/OLS_ADMIN_PASSWORD=${NEW_PASS}/" /etc/fotios-claude/credentials.conf
+        sed -i "s/OLS_ADMIN_USER=.*/OLS_ADMIN_USER=${NEW_USER}/" /etc/codehero/credentials.conf
+        sed -i "s/OLS_ADMIN_PASSWORD=.*/OLS_ADMIN_PASSWORD=${NEW_PASS}/" /etc/codehero/credentials.conf
         echo -e "${GREEN}OLS WebAdmin password changed successfully${NC}"
     else
         echo -e "${RED}Failed to change OLS admin password${NC}"
@@ -143,15 +143,15 @@ change_admin_panel() {
     HASH=$(echo -n "$NEW_PASS" | python3 -c "import bcrypt,sys; print(bcrypt.hashpw(sys.stdin.read().encode(), bcrypt.gensalt()).decode())")
 
     # Use app user credentials from system.conf (readable, has UPDATE privileges)
-    source /etc/fotios-claude/system.conf 2>/dev/null
+    source /etc/codehero/system.conf 2>/dev/null
     APP_USER="${DB_USER:-claude_user}"
     APP_PASS="${DB_PASSWORD:-claudepass123}"
     DB_NAME="${DB_NAME:-claude_knowledge}"
 
     mysql -u "${APP_USER}" -p"${APP_PASS}" ${DB_NAME} -e "UPDATE developers SET username='${NEW_USER}', password_hash='${HASH}' WHERE id=1;" 2>/dev/null
     if [ $? -eq 0 ]; then
-        sed -i "s/ADMIN_USER=.*/ADMIN_USER=${NEW_USER}/" /etc/fotios-claude/credentials.conf
-        sed -i "s/ADMIN_PASSWORD=.*/ADMIN_PASSWORD=${NEW_PASS}/" /etc/fotios-claude/credentials.conf
+        sed -i "s/ADMIN_USER=.*/ADMIN_USER=${NEW_USER}/" /etc/codehero/credentials.conf
+        sed -i "s/ADMIN_PASSWORD=.*/ADMIN_PASSWORD=${NEW_PASS}/" /etc/codehero/credentials.conf
         echo -e "${GREEN}Admin Panel password changed successfully${NC}"
     else
         echo -e "${RED}Failed to change Admin Panel password${NC}"
@@ -191,4 +191,4 @@ esac
 
 echo ""
 echo -e "${GREEN}Done!${NC}"
-echo "Updated credentials saved to /etc/fotios-claude/credentials.conf"
+echo "Updated credentials saved to /etc/codehero/credentials.conf"

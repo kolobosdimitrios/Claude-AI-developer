@@ -8,7 +8,7 @@ User=claude-worker
 Group=claude-worker
 WorkingDirectory=/home/claude-worker
 Environment=HOME=/home/claude-worker
-ExecStart=/usr/bin/python3 /opt/fotios-claude/scripts/claude-daemon.py
+ExecStart=/usr/bin/python3 /opt/codehero/scripts/claude-daemon.py
 Restart=always
 RestartSec=10
 
