@@ -5,6 +5,14 @@ All notable changes to the Fotios Claude System will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.50.4] - 2026-01-12
+
+### Improved
+- **Windows Batch File**: Now ensures services are running inside VM
+  - Runs `systemctl start` for web and daemon services after VM boots
+  - Increased boot wait time to 15 seconds
+  - Guarantees dashboard is accessible when browser opens
+
 ## [2.50.3] - 2026-01-12
 
 ### Improved

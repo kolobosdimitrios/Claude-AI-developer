@@ -349,8 +349,13 @@ if %ERRORLEVEL% NEQ 0 (
     echo Starting VM...
     multipass start claude-dev
     echo Waiting for VM to boot...
-    timeout /t 10 /nobreak >nul
+    timeout /t 15 /nobreak >nul
 )
+
+REM Ensure services are running inside VM
+echo Checking services...
+multipass exec claude-dev -- sudo systemctl start fotios-claude-web 2>nul
+multipass exec claude-dev -- sudo systemctl start fotios-claude-daemon 2>nul
 
 REM Get IP address
 for /f "tokens=3 delims=," %%a in ('multipass list --format csv 2^>nul ^| findstr /C:"claude-dev"') do set IP=%%a
