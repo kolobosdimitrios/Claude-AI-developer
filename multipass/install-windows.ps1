@@ -136,7 +136,7 @@ Write-Host "      - OS: Ubuntu 24.04 LTS" -ForegroundColor Gray
 Write-Host ""
 Write-Host "      Please wait..." -ForegroundColor Gray
 
-multipass launch 24.04 --name claude-dev --memory 4G --disk 40G --cpus 2 --cloud-init $cloudInitPath
+multipass launch 24.04 --name claude-dev --memory 4G --disk 40G --cpus 2 --timeout 1800 --cloud-init $cloudInitPath
 
 # Wait for cloud-init to complete
 Write-Host "      Waiting for installation to complete..." -ForegroundColor Yellow

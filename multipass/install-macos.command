@@ -67,7 +67,7 @@ echo "      - OS: Ubuntu 24.04 LTS"
 echo ""
 echo "      Please wait..."
 
-multipass launch 24.04 --name claude-dev --memory 4G --disk 40G --cpus 2 --cloud-init "$CLOUD_INIT_PATH"
+multipass launch 24.04 --name claude-dev --memory 4G --disk 40G --cpus 2 --timeout 1800 --cloud-init "$CLOUD_INIT_PATH"
 
 # Wait for cloud-init to complete
 echo "[5/5] Waiting for installation to complete..."
