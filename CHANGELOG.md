@@ -5,6 +5,16 @@ All notable changes to CodeHero will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.54.0] - 2026-01-12
+
+### Changed
+- **Complete Infrastructure Rebrand** - Full migration from `fotios-claude` to `codehero`
+  - Renamed production path: `/opt/fotios-claude` → `/opt/codehero`
+  - Renamed log path: `/var/log/fotios-claude` → `/var/log/codehero`
+  - New service names: `codehero-web` and `codehero-daemon`
+  - Updated all systemd service files
+  - Services enabled for auto-start on boot
+
 ## [2.53.0] - 2026-01-12
 
 ### Changed
