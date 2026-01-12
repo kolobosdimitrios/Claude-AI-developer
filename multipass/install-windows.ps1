@@ -247,10 +247,50 @@ while ($waited -lt $maxWait) {
     Write-Host "      Still installing... ($minutes minutes elapsed)" -ForegroundColor Gray
 }
 
-$ErrorActionPreference = "Stop"
+# Get IP address (try multiple methods)
+$ip = ""
 
-# Get IP address
-$ip = multipass exec claude-dev -- hostname -I | ForEach-Object { $_.Split()[0] }
+# Method 1: hostname -I
+try {
+    $ipOutput = & multipass exec claude-dev -- hostname -I 2>$null
+    if ($ipOutput) {
+        $ip = ($ipOutput -split '\s+')[0]
+    }
+} catch {}
+
+# Method 2: multipass info
+if (-not $ip) {
+    try {
+        $infoOutput = & multipass info claude-dev 2>$null
+        $ipLine = $infoOutput | Select-String "IPv4"
+        if ($ipLine) {
+            $ip = ($ipLine -split '\s+')[-1]
+        }
+    } catch {}
+}
+
+# Method 3: multipass list
+if (-not $ip) {
+    try {
+        $listOutput = & multipass list --format csv 2>$null
+        $claudeLine = $listOutput | Select-String "claude-dev"
+        if ($claudeLine) {
+            $parts = $claudeLine -split ','
+            if ($parts.Count -ge 3) {
+                $ip = $parts[2].Trim()
+            }
+        }
+    } catch {}
+}
+
+# Fallback message
+if (-not $ip) {
+    $ip = "[RUN: multipass list]"
+    Write-Host ""
+    Write-Host "  NOTE: Could not auto-detect IP. Run this command to find it:" -ForegroundColor Yellow
+    Write-Host "  multipass list" -ForegroundColor White
+    Write-Host ""
+}
 
 # Cleanup
 Remove-Item $cloudInitPath -Force -ErrorAction SilentlyContinue
