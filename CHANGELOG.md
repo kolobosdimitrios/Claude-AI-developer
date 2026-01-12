@@ -5,6 +5,18 @@ All notable changes to the Fotios Claude System will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.47.0] - 2026-01-12
+
+### Added
+- **One-Click Multipass Installers**: Install with a single click on any platform
+  - `install-windows.ps1` - PowerShell script for Windows
+  - `install-macos.command` - Double-click installer for macOS
+  - `install-linux.sh` - Shell script for Linux
+  - `cloud-init.yaml` - Automatic VM configuration
+  - Auto-installs Multipass if not present
+  - Auto-detects latest release from GitHub API
+- **MULTIPASS_INSTALL.md**: Complete documentation for one-click install
+
 ## [2.46.1] - 2026-01-12
 
 ### Fixed
