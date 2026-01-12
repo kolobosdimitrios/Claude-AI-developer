@@ -3579,6 +3579,146 @@ def claude_assistant():
     mode = request.args.get('mode', '')  # blueprint, etc.
     return render_template('claude_assistant.html', user=session.get('user'), popup=popup, mode=mode)
 
+# ============ UPDATE SYSTEM ============
+
+GITHUB_REPO = "fotsakir/Claude-AI-developer"
+GITHUB_API_URL = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
+
+@app.route('/api/check-update')
+@login_required
+def check_update():
+    """Check if a new version is available on GitHub"""
+    try:
+        req = urllib.request.Request(
+            GITHUB_API_URL,
+            headers={'User-Agent': 'FotiosClaude/' + VERSION}
+        )
+        with urllib.request.urlopen(req, timeout=10) as response:
+            data = json.loads(response.read().decode('utf-8'))
+
+        latest_version = data.get('tag_name', '').lstrip('v')
+        release_name = data.get('name', '')
+        release_body = data.get('body', '')
+        release_url = data.get('html_url', '')
+        published_at = data.get('published_at', '')
+
+        # Find the zip asset
+        download_url = None
+        for asset in data.get('assets', []):
+            if asset['name'].endswith('.zip'):
+                download_url = asset['browser_download_url']
+                break
+
+        # Compare versions
+        def parse_version(v):
+            return [int(x) for x in v.split('.') if x.isdigit()]
+
+        current = parse_version(VERSION)
+        latest = parse_version(latest_version)
+
+        has_update = latest > current
+
+        return jsonify({
+            'has_update': has_update,
+            'current_version': VERSION,
+            'latest_version': latest_version,
+            'release_name': release_name,
+            'release_notes': release_body[:500] + ('...' if len(release_body) > 500 else ''),
+            'release_url': release_url,
+            'download_url': download_url,
+            'published_at': published_at
+        })
+    except Exception as e:
+        return jsonify({'error': str(e), 'has_update': False}), 500
+
+@app.route('/api/do-update', methods=['POST'])
+@login_required
+def do_update():
+    """Download and install the latest update"""
+    try:
+        # First check for update
+        req = urllib.request.Request(
+            GITHUB_API_URL,
+            headers={'User-Agent': 'FotiosClaude/' + VERSION}
+        )
+        with urllib.request.urlopen(req, timeout=10) as response:
+            data = json.loads(response.read().decode('utf-8'))
+
+        # Find the zip asset
+        download_url = None
+        zip_name = None
+        for asset in data.get('assets', []):
+            if asset['name'].endswith('.zip'):
+                download_url = asset['browser_download_url']
+                zip_name = asset['name']
+                break
+
+        if not download_url:
+            return jsonify({'error': 'No download found'}), 400
+
+        # Download to temp directory
+        temp_dir = tempfile.mkdtemp()
+        zip_path = os.path.join(temp_dir, zip_name)
+
+        req = urllib.request.Request(download_url, headers={'User-Agent': 'FotiosClaude/' + VERSION})
+        with urllib.request.urlopen(req, timeout=300) as response:
+            with open(zip_path, 'wb') as f:
+                f.write(response.read())
+
+        # Extract
+        extract_dir = os.path.join(temp_dir, 'extracted')
+        with zipfile.ZipFile(zip_path, 'r') as z:
+            z.extractall(extract_dir)
+
+        # Find the fotios-claude-system folder inside
+        extracted_folder = None
+        for item in os.listdir(extract_dir):
+            if item.startswith('fotios-claude-system'):
+                extracted_folder = os.path.join(extract_dir, item)
+                break
+
+        if not extracted_folder or not os.path.isdir(extracted_folder):
+            shutil.rmtree(temp_dir)
+            return jsonify({'error': 'Invalid archive structure'}), 400
+
+        # Run upgrade.sh
+        upgrade_script = os.path.join(extracted_folder, 'upgrade.sh')
+        if not os.path.exists(upgrade_script):
+            shutil.rmtree(temp_dir)
+            return jsonify({'error': 'upgrade.sh not found'}), 400
+
+        # Make executable and run
+        os.chmod(upgrade_script, 0o755)
+        result = subprocess.run(
+            ['bash', upgrade_script, '-y'],
+            cwd=extracted_folder,
+            capture_output=True,
+            text=True,
+            timeout=300
+        )
+
+        # Cleanup
+        shutil.rmtree(temp_dir)
+
+        if result.returncode == 0:
+            return jsonify({
+                'success': True,
+                'message': 'Update installed successfully. Please refresh the page.',
+                'output': result.stdout[-2000:] if len(result.stdout) > 2000 else result.stdout
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Upgrade failed',
+                'output': result.stderr[-1000:] if len(result.stderr) > 1000 else result.stderr,
+                'stdout': result.stdout[-1000:] if len(result.stdout) > 1000 else result.stdout
+            }), 500
+
+    except subprocess.TimeoutExpired:
+        return jsonify({'error': 'Upgrade timed out'}), 500
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 # ============ WEBSOCKET ============
 
 @socketio.on('connect')

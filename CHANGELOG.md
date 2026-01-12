@@ -5,6 +5,16 @@ All notable changes to the Fotios Claude System will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.50.0] - 2026-01-12
+
+### Added
+- **Auto-Update System**: Check and install updates directly from the dashboard
+  - Automatic update check on page load
+  - Green "Update Available" badge in header when new version exists
+  - One-click update installation with progress tracking
+  - Downloads latest release from GitHub and runs upgrade.sh
+  - Shows release notes before updating
+
 ## [2.49.0] - 2026-01-12
 
 ### Added
