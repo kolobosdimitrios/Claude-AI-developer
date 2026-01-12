@@ -18,8 +18,56 @@ if (-not $isAdmin) {
     exit 1
 }
 
+# Check if Hyper-V is available (Windows Pro/Enterprise) or need VirtualBox (Windows Home)
+Write-Host "[1/6] Checking Windows edition..." -ForegroundColor Yellow
+$hyperv = Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -ErrorAction SilentlyContinue
+$needsVirtualBox = $false
+
+if (-not $hyperv -or $hyperv.State -ne "Enabled") {
+    # Check if this is Windows Home (no Hyper-V support)
+    $edition = (Get-WmiObject -Class Win32_OperatingSystem).Caption
+    if ($edition -match "Home") {
+        Write-Host "      Windows Home detected - will use VirtualBox" -ForegroundColor Yellow
+        $needsVirtualBox = $true
+    } else {
+        Write-Host "      Hyper-V not enabled. Enabling..." -ForegroundColor Yellow
+        try {
+            Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All -NoRestart -ErrorAction Stop
+            Write-Host "      Hyper-V enabled. Please RESTART and run this script again." -ForegroundColor Red
+            Read-Host "Press Enter to exit"
+            exit 0
+        } catch {
+            Write-Host "      Could not enable Hyper-V - will use VirtualBox" -ForegroundColor Yellow
+            $needsVirtualBox = $true
+        }
+    }
+} else {
+    Write-Host "      Hyper-V is available." -ForegroundColor Green
+}
+
+# Install VirtualBox if needed (Windows Home)
+if ($needsVirtualBox) {
+    Write-Host "[2/6] Checking for VirtualBox..." -ForegroundColor Yellow
+    $vbox = Get-Command VBoxManage -ErrorAction SilentlyContinue
+
+    if (-not $vbox) {
+        Write-Host "      VirtualBox not found. Installing..." -ForegroundColor Yellow
+        $winget = Get-Command winget -ErrorAction SilentlyContinue
+        if ($winget) {
+            winget install -e --id Oracle.VirtualBox --accept-package-agreements --accept-source-agreements
+        } else {
+            Write-Host "      Please install VirtualBox manually from: https://www.virtualbox.org/wiki/Downloads" -ForegroundColor Red
+            Read-Host "Press Enter after installing VirtualBox"
+        }
+        # Refresh PATH
+        $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+    } else {
+        Write-Host "      VirtualBox is installed." -ForegroundColor Green
+    }
+}
+
 # Check if Multipass is installed
-Write-Host "[1/5] Checking for Multipass..." -ForegroundColor Yellow
+Write-Host "[3/6] Checking for Multipass..." -ForegroundColor Yellow
 $multipass = Get-Command multipass -ErrorAction SilentlyContinue
 
 if (-not $multipass) {
@@ -48,15 +96,24 @@ if (-not $multipass) {
     Write-Host "      Multipass is already installed." -ForegroundColor Green
 }
 
+# Configure Multipass to use VirtualBox if needed
+if ($needsVirtualBox) {
+    Write-Host "      Configuring Multipass to use VirtualBox..." -ForegroundColor Yellow
+    Start-Sleep -Seconds 2
+    & multipass set local.driver=virtualbox 2>$null
+    Start-Service Multipass -ErrorAction SilentlyContinue
+    Start-Sleep -Seconds 3
+}
+
 # Download cloud-init
-Write-Host "[2/5] Downloading configuration..." -ForegroundColor Yellow
+Write-Host "[4/6] Downloading configuration..." -ForegroundColor Yellow
 $cloudInitUrl = "https://raw.githubusercontent.com/fotsakir/Claude-AI-developer/main/multipass/cloud-init.yaml"
 $cloudInitPath = "$env:TEMP\cloud-init.yaml"
 Invoke-WebRequest -Uri $cloudInitUrl -OutFile $cloudInitPath
 Write-Host "      Done." -ForegroundColor Green
 
 # Check if VM already exists
-Write-Host "[3/5] Checking for existing VM..." -ForegroundColor Yellow
+Write-Host "[5/6] Checking for existing VM..." -ForegroundColor Yellow
 $existingVm = multipass list --format csv | Select-String "claude-dev"
 if ($existingVm) {
     Write-Host "      VM 'claude-dev' already exists!" -ForegroundColor Yellow
@@ -71,7 +128,7 @@ if ($existingVm) {
 }
 
 # Create VM
-Write-Host "[4/5] Creating VM (this takes 15-20 minutes)..." -ForegroundColor Yellow
+Write-Host "[6/6] Creating VM (this takes 15-20 minutes)..." -ForegroundColor Yellow
 Write-Host "      - Name: claude-dev" -ForegroundColor Gray
 Write-Host "      - Memory: 4GB" -ForegroundColor Gray
 Write-Host "      - Disk: 40GB" -ForegroundColor Gray
@@ -82,7 +139,7 @@ Write-Host "      Please wait..." -ForegroundColor Gray
 multipass launch 24.04 --name claude-dev --memory 4G --disk 40G --cpus 2 --cloud-init $cloudInitPath
 
 # Wait for cloud-init to complete
-Write-Host "[5/5] Waiting for installation to complete..." -ForegroundColor Yellow
+Write-Host "      Waiting for installation to complete..." -ForegroundColor Yellow
 Write-Host "      This may take 10-15 more minutes..." -ForegroundColor Gray
 
 # Poll for completion
