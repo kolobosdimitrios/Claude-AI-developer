@@ -143,9 +143,9 @@ def poll_telegram_replies():
 def extract_ticket_from_message(text):
     """Extract ticket number from notification message"""
     import re
-    # Look for ticket number pattern: XXXX-0000 (e.g., WEATHERAPP-0002)
-    # Can be after 🎫 Ticket:, 📋, or standalone
-    match = re.search(r'([A-Z]+-\d+)', text)
+    # Look for ticket number pattern: XXXX-0000 or XXX30-0000 (e.g., WEATHERAPP-0002, TEST30-0001)
+    # Project code can be letters followed by optional numbers
+    match = re.search(r'([A-Z]+\d*-\d+)', text)
     if match:
         return match.group(1)
     return None
