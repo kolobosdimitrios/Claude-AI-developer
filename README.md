@@ -236,11 +236,20 @@ Paste → Enter → Wait 15 minutes → Done! [Full guide →](docs/MULTIPASS_IN
 #### One-Command Install
 
 ```bash
-# Download, extract, and run
+# Install required tools
+apt-get update && apt-get install -y unzip wget net-tools
+
+# Download and extract
 cd /root
+wget https://github.com/fotsakir/Claude-AI-developer/releases/latest/download/fotios-claude-system-2.47.0.zip
 unzip fotios-claude-system-2.47.0.zip
 cd fotios-claude-system
+
+# Run setup
 chmod +x setup.sh && ./setup.sh
+
+# Find your IP address
+ifconfig
 
 # Then install Claude Code CLI
 /opt/fotios-claude/scripts/install-claude-code.sh

@@ -693,11 +693,16 @@
         <details style="margin-top: 1.5rem; text-align: left; max-width: 700px; margin-left: auto; margin-right: auto;">
             <summary style="cursor: pointer; color: var(--text-secondary); font-size: 0.9rem;">📦 Manual Install (Ubuntu Server)</summary>
             <div class="code-block" style="margin-top: 0.5rem;">
-                <span class="comment"># Quick Install on Ubuntu</span><br>
+                <span class="comment"># Install required tools</span><br>
+                <span class="command">apt-get update && apt-get install -y unzip wget net-tools</span><br><br>
+                <span class="comment"># Download and extract</span><br>
                 <span class="command">cd /root</span><br>
                 <span class="command">wget https://github.com/fotsakir/Claude-AI-developer/releases/latest/download/fotios-claude-system-2.47.0.zip</span><br>
-                <span class="command">unzip fotios-claude-system-*.zip && cd fotios-claude-system</span><br>
-                <span class="command">./setup.sh</span>
+                <span class="command">unzip fotios-claude-system-*.zip && cd fotios-claude-system</span><br><br>
+                <span class="comment"># Run setup</span><br>
+                <span class="command">./setup.sh</span><br><br>
+                <span class="comment"># Find your IP address</span><br>
+                <span class="command">ifconfig</span>
             </div>
         </details>
     </section>
