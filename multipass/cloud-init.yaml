@@ -46,9 +46,26 @@ write_files:
       chmod +x setup.sh
       ./setup.sh
 
-      # Install Claude Code CLI
+      # Install Claude Code CLI (install only, don't run)
       echo "[4/4] Installing Claude Code CLI..."
-      /opt/fotios-claude/scripts/install-claude-code.sh
+
+      # Create claude user if not exists
+      if ! id "claude" &>/dev/null; then
+          useradd -m -s /bin/bash claude
+          echo "claude ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/claude
+      fi
+
+      # Install Node.js if needed
+      if ! command -v node &>/dev/null; then
+          curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+          apt-get install -y nodejs
+      fi
+
+      # Install Claude Code for claude user
+      su - claude -c 'curl -fsSL https://claude.ai/install.sh | bash'
+      su - claude -c 'echo "export PATH=\"\$HOME/.local/bin:\$PATH\"" >> ~/.bashrc'
+
+      echo "Claude Code installed. Run 'claude' as the claude user to activate."
 
       # Get IP address
       IP=$(hostname -I | awk '{print $1}')
