@@ -300,12 +300,11 @@ else
     echo "  (all packages already installed)"
 fi
 
-# Step 3: Stop services
-log_info "Stopping services..."
-systemctl stop fotios-claude-web 2>/dev/null || true
+# Step 3: Stop daemon only (web stays running until end)
+log_info "Stopping daemon..."
 systemctl stop fotios-claude-daemon 2>/dev/null || true
-sleep 2
-log_success "Services stopped"
+sleep 1
+log_success "Daemon stopped"
 
 # Step 4: Apply database migrations
 if [ ${#PENDING_MIGRATIONS[@]} -gt 0 ]; then
@@ -375,13 +374,13 @@ log_info "Fixing log file permissions..."
 touch /var/log/fotios-claude/daemon.log /var/log/fotios-claude/web.log 2>/dev/null || true
 chown claude:claude /var/log/fotios-claude/daemon.log /var/log/fotios-claude/web.log 2>/dev/null || true
 
-# Step 7: Start services
-log_info "Starting services..."
-systemctl start fotios-claude-daemon
+# Step 7: Restart services
+log_info "Restarting services..."
+systemctl restart fotios-claude-daemon
 sleep 1
-systemctl start fotios-claude-web
+systemctl restart fotios-claude-web
 sleep 2
-log_success "Services started"
+log_success "Services restarted"
 
 # Step 7: Verify
 log_info "Verifying services..."

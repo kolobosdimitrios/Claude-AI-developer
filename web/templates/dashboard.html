@@ -1069,11 +1069,12 @@
     <div class="noise"></div>
 
     <div class="header">
-        <h1>Fotios Claude <span style="font-size:14px;color:var(--text-muted);font-weight:normal">v{{ version }}</span>
-            <button id="updateBadge" onclick="openUpdateModal()" style="display:none; margin-left:8px; padding:2px 8px; font-size:11px; background:var(--accent-green); color:white; border:none; border-radius:4px; cursor:pointer; animation: pulse-green 2s infinite;">
-                Update Available
+        <div style="display:flex; align-items:center; gap:12px;">
+            <h1>Fotios Claude <span style="font-size:14px;color:var(--text-muted);font-weight:normal">v{{ version }}</span></h1>
+            <button id="updateBadge" onclick="openUpdateModal()" style="display:none; padding:6px 14px; font-size:12px; font-weight:600; background:linear-gradient(135deg, #10b981, #059669); color:white; border:none; border-radius:6px; cursor:pointer; animation:pulse-green 2s infinite; white-space:nowrap; box-shadow:0 2px 8px rgba(16,185,129,0.3);">
+                🚀 Update Available
             </button>
-        </h1>
+        </div>
         <div class="nav">
             <a href="/dashboard" class="active">Dashboard</a>
             <a href="/projects">Projects</a>
@@ -2005,7 +2006,7 @@
                 if (data.has_update) {
                     updateData = data;
                     document.getElementById('updateBadge').style.display = 'inline-block';
-                    document.getElementById('updateBadge').textContent = 'v' + data.latest_version + ' Available';
+                    document.getElementById('updateBadge').innerHTML = '🚀 v' + data.latest_version + ' Available';
                 }
             } catch (e) {
                 console.log('Update check failed:', e);
@@ -2042,15 +2043,25 @@
                 document.getElementById('updateResult').style.display = 'block';
 
                 if (data.success) {
+                    document.getElementById('updateBadge').style.display = 'none';
+                    let countdown = 30;
                     document.getElementById('updateResult').innerHTML = `
                         <div style="text-align: center; padding: 20px;">
-                            <div style="font-size: 3rem; margin-bottom: 16px;">✅</div>
-                            <div style="font-size: 1.2rem; color: var(--accent-green); margin-bottom: 8px;">Update Installed!</div>
-                            <div style="color: var(--text-secondary); margin-bottom: 16px;">Please refresh the page to see the new version.</div>
-                            <button class="activation-btn activation-btn-primary" onclick="location.reload()">Refresh Page</button>
+                            <div style="font-size: 3rem; margin-bottom: 16px;">⏳</div>
+                            <div style="font-size: 1.2rem; color: var(--accent-green); margin-bottom: 8px;">Update Installing...</div>
+                            <div style="color: var(--text-secondary); margin-bottom: 16px;">Page will reload in <span id="countdown">30</span> seconds</div>
+                            <button class="activation-btn activation-btn-primary" onclick="location.reload()">Reload Now</button>
                         </div>
                     `;
-                    document.getElementById('updateBadge').style.display = 'none';
+                    const countdownInterval = setInterval(() => {
+                        countdown--;
+                        const el = document.getElementById('countdown');
+                        if (el) el.textContent = countdown;
+                        if (countdown <= 0) {
+                            clearInterval(countdownInterval);
+                            location.reload();
+                        }
+                    }, 1000);
                 } else {
                     document.getElementById('updateResult').innerHTML = `
                         <div style="text-align: center; padding: 20px;">

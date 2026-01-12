@@ -3687,35 +3687,35 @@ def do_update():
             shutil.rmtree(temp_dir)
             return jsonify({'error': 'upgrade.sh not found'}), 400
 
-        # Make executable and run
+        # Make executable and run with sudo in background
+        # The upgrade restarts services, so we run it detached
         os.chmod(upgrade_script, 0o755)
-        result = subprocess.run(
-            ['bash', upgrade_script, '-y'],
+
+        # Create a wrapper script that runs upgrade and cleans up
+        wrapper_script = os.path.join(temp_dir, 'run_upgrade.sh')
+        with open(wrapper_script, 'w') as f:
+            f.write(f'''#!/bin/bash
+cd "{extracted_folder}"
+bash "{upgrade_script}" -y > /var/log/fotios-claude/upgrade.log 2>&1
+rm -rf "{temp_dir}"
+''')
+        os.chmod(wrapper_script, 0o755)
+
+        # Run in background with nohup
+        subprocess.Popen(
+            ['sudo', 'nohup', 'bash', wrapper_script],
             cwd=extracted_folder,
-            capture_output=True,
-            text=True,
-            timeout=300
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            start_new_session=True
         )
 
-        # Cleanup
-        shutil.rmtree(temp_dir)
+        return jsonify({
+            'success': True,
+            'message': 'Update started. The page will reload in 30 seconds.',
+            'background': True
+        })
 
-        if result.returncode == 0:
-            return jsonify({
-                'success': True,
-                'message': 'Update installed successfully. Please refresh the page.',
-                'output': result.stdout[-2000:] if len(result.stdout) > 2000 else result.stdout
-            })
-        else:
-            return jsonify({
-                'success': False,
-                'error': 'Upgrade failed',
-                'output': result.stderr[-1000:] if len(result.stderr) > 1000 else result.stderr,
-                'stdout': result.stdout[-1000:] if len(result.stdout) > 1000 else result.stdout
-            }), 500
-
-    except subprocess.TimeoutExpired:
-        return jsonify({'error': 'Upgrade timed out'}), 500
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
