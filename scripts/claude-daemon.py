@@ -1516,6 +1516,17 @@ User's question: {question if question else "What is the current status?"}
 
 Answer briefly:"""
 
+            # Load API key from .env if exists (same as main ticket processing)
+            claude_env = os.environ.copy()
+            env_file = os.path.join(os.path.expanduser("~"), ".claude/.env")
+            if os.path.exists(env_file):
+                with open(env_file, 'r') as f:
+                    for line in f:
+                        line = line.strip()
+                        if '=' in line and not line.startswith('#'):
+                            key, value = line.split('=', 1)
+                            claude_env[key] = value
+
             # Use claude CLI with haiku model (full path needed for daemon)
             claude_bin = os.path.expanduser('~/.local/bin/claude')
             self.log(f"Calling Haiku: {claude_bin}", "DEBUG")
@@ -1524,7 +1535,8 @@ Answer briefly:"""
                 capture_output=True,
                 text=True,
                 timeout=30,
-                cwd=os.path.expanduser('~')
+                cwd=os.path.expanduser('~'),
+                env=claude_env
             )
 
             self.log(f"Haiku returncode: {result.returncode}", "DEBUG")
