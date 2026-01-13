@@ -239,7 +239,7 @@
 
         /* Order elements: CodeHero first, animation after */
         .hero > .hero-title-row { order: 1; }
-        .hero > div:nth-child(3) { order: 2; }  /* Powered by Claude AI badge */
+        .hero > .powered-badge { order: 2; }
         .hero > .subtitle { order: 3; }
         .hero > .day-scene { order: 4; margin-top: 30px; margin-bottom: 30px; }
         .hero > .cta-buttons { order: 5; }
@@ -1198,7 +1198,7 @@
                 transform: scale(1.2) !important;
             }
 
-            .hero > div:nth-child(3) {
+            .hero > .powered-badge {
                 order: 2 !important;
             }
 
@@ -1266,7 +1266,7 @@
             </div>
             <h1>CodeHero</h1>
         </div>
-        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 16px;">
+        <div class="powered-badge" style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 16px;">
             <span style="background: linear-gradient(135deg, #8b5cf6, #6366f1); padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; color: white; display: flex; align-items: center; gap: 6px;">
                 ⚡ Powered by Claude AI
             </span>
