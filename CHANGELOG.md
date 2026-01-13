@@ -5,6 +5,34 @@ All notable changes to CodeHero will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.60.0] - 2026-01-13
+
+### Added
+- **Favicon** - New superhero-themed favicon for admin panel and website
+- **PWA Support** - Admin panel can now be installed as Progressive Web App
+  - manifest.json with app icons (192x192, 512x512)
+  - Service worker for offline support
+  - Apple touch icon for iOS
+- **CodeHero PRO Section** - Added "Coming Soon" PRO features section to landing page
+  - Multi-Agent Orchestration
+  - AI Code Review
+  - Team Collaboration
+  - Advanced Analytics
+  - Enterprise SSO
+  - AI Ecosystem (OpenAI, Gemini, local LLMs)
+- **Claude Activation Guide** - Comprehensive documentation in README
+  - Subscription activation (Pro/Max) via Web Terminal and Linux Terminal
+  - API Key activation via Dashboard and Linux Terminal
+  - Verification and deactivation instructions
+
+### Changed
+- **Activation Modal** - Simplified with clear instructions and "Open Terminal" button
+- **Dashboard Auto-Refresh** - No longer closes modals when refreshing
+- **License Status** - Improved detection for both subscription and API key methods
+
+### Fixed
+- **Token Sync** - OAuth tokens from .credentials.json now sync to .env for daemon
+
 ## [2.59.2] - 2026-01-13
 
 ### Changed

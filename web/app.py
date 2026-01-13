@@ -76,7 +76,7 @@ CONFIG_FILE = "/etc/codehero/system.conf"
 DAEMON_SCRIPT = "/opt/codehero/scripts/claude-daemon.py"
 PID_FILE = "/var/run/codehero/daemon.pid"
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static', static_url_path='/static')
 app.secret_key = os.urandom(24)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading', allow_upgrades=False)
@@ -3081,19 +3081,52 @@ class ActivationSession:
         return False
 
     def _reader(self):
+        print(f"[DEBUG] ActivationSession _reader started, fd={self.fd}")
         while self.running:
             try:
                 r, _, _ = select.select([self.fd], [], [], 0.1)
                 if r:
                     data = os.read(self.fd, 4096)
                     if data:
+                        decoded = data.decode('utf-8', errors='replace')
+                        print(f"[DEBUG] Read {len(decoded)} chars from pty")
                         with self.lock:
-                            self.output_buffer += data.decode('utf-8', errors='replace')
+                            self.output_buffer += decoded
+                        # Check if output contains the final OAuth token
+                        self._check_for_token(decoded)
                     else:
+                        print("[DEBUG] No data, breaking")
                         break
-            except:
+            except Exception as e:
+                print(f"[DEBUG] Reader exception: {e}")
                 break
+        print("[DEBUG] Reader stopped")
         self.running = False
+
+    def _check_for_token(self, output):
+        """Check if credentials.json was created and sync token to .env"""
+        # Check if .credentials.json exists (claude login saves tokens there)
+        creds_file = os.path.join(self.user_home, ".claude/.credentials.json")
+        if os.path.exists(creds_file):
+            try:
+                with open(creds_file, 'r') as f:
+                    creds = json.load(f)
+                # Extract OAuth token from credentials
+                oauth = creds.get('claudeAiOauth', {})
+                access_token = oauth.get('accessToken')
+                if access_token and access_token.startswith('sk-ant-'):
+                    # Check if we already saved this token
+                    env_file = os.path.join(self.user_home, ".claude/.env")
+                    already_saved = False
+                    if os.path.exists(env_file):
+                        with open(env_file, 'r') as f:
+                            if access_token in f.read():
+                                already_saved = True
+                    if not already_saved:
+                        print(f"[DEBUG] Found OAuth token in credentials.json: {access_token[:20]}...")
+                        self._save_api_key(access_token)
+            except Exception as e:
+                print(f"[DEBUG] Error reading credentials: {e}")
 
     def get_output(self):
         with self.lock:
@@ -3103,22 +3136,30 @@ class ActivationSession:
     def send_input(self, data):
         if self.fd and self.running:
             try:
-                # Check if user is entering an API key
-                if isinstance(data, str) and data.strip().startswith('sk-ant-'):
-                    self._save_api_key(data.strip().split('\n')[0].split('\r')[0])
+                # Don't intercept authorization code - let Claude process it
+                # The final token will be caught by _check_for_token
                 os.write(self.fd, data.encode() if isinstance(data, str) else data)
                 return True
             except: pass
         return False
 
     def _save_api_key(self, api_key):
-        """Save API key to .env file for daemon to use"""
+        """Save API key or OAuth token to .env file for daemon to use"""
         try:
             env_dir = os.path.join(self.user_home, ".claude")
             os.makedirs(env_dir, exist_ok=True)
             env_file = os.path.join(env_dir, ".env")
+
+            # Detect token type and use correct env var name
+            if api_key.startswith('sk-ant-oat'):
+                # OAuth token
+                env_var = 'CLAUDE_CODE_OAUTH_TOKEN'
+            else:
+                # API key
+                env_var = 'ANTHROPIC_API_KEY'
+
             with open(env_file, 'w') as f:
-                f.write(f"ANTHROPIC_API_KEY={api_key}\n")
+                f.write(f"{env_var}={api_key}\n")
             # Set proper ownership
             username = os.path.basename(self.user_home)
             try:
@@ -3150,13 +3191,26 @@ class ActivationSession:
         # Check for OAuth credentials OR API key in .env
         creds_file = os.path.join(self.user_home, ".claude/.credentials.json")
         env_file = os.path.join(self.user_home, ".claude/.env")
+
+        # If credentials.json exists, sync token to .env
         if os.path.exists(creds_file):
+            try:
+                with open(creds_file, 'r') as f:
+                    creds = json.load(f)
+                oauth = creds.get('claudeAiOauth', {})
+                access_token = oauth.get('accessToken')
+                if access_token and access_token.startswith('sk-ant-'):
+                    # Sync to .env if not already there
+                    self._save_api_key(access_token)
+            except: pass
             return True
+
         if os.path.exists(env_file):
             try:
                 with open(env_file, 'r') as f:
                     content = f.read()
-                    if 'ANTHROPIC_API_KEY=sk-ant-' in content:
+                    # Check for both OAuth token and API key
+                    if 'ANTHROPIC_API_KEY=sk-ant-' in content or 'CLAUDE_CODE_OAUTH_TOKEN=sk-ant-' in content:
                         return True
             except: pass
         # Also check .claude.json for oauthAccount
@@ -3303,9 +3357,38 @@ def ensure_claude_config_flags():
 @app.route('/api/claude/status')
 @login_required
 def claude_status():
-    creds = os.path.join(CLAUDE_USER_HOME, ".claude/.credentials.json")
+    # Check multiple possible credential locations
+    creds_old = os.path.join(CLAUDE_USER_HOME, ".claude/.credentials.json")
+    creds_new = os.path.join(CLAUDE_USER_HOME, ".claude.json")
     env_file = os.path.join(CLAUDE_USER_HOME, ".claude/.env")
-    activated = os.path.exists(creds) or os.path.exists(env_file)
+
+    activated = False
+
+    # Check old credentials file
+    if os.path.exists(creds_old):
+        activated = True
+
+    # Check new .claude.json for oauthAccount
+    if not activated and os.path.exists(creds_new):
+        try:
+            with open(creds_new, 'r') as f:
+                config = json.load(f)
+                if 'oauthAccount' in config:
+                    activated = True
+        except:
+            pass
+
+    # Check .env file for valid tokens/keys
+    if not activated and os.path.exists(env_file):
+        try:
+            with open(env_file, 'r') as f:
+                content = f.read()
+                # Check for both OAuth token and API key
+                if 'ANTHROPIC_API_KEY=sk-ant-' in content or 'CLAUDE_CODE_OAUTH_TOKEN=sk-ant-' in content:
+                    activated = True
+        except:
+            pass
+
     if activated:
         ensure_claude_config_flags()
     return jsonify({'activated': activated})
@@ -3314,12 +3397,18 @@ def claude_status():
 @app.route('/api/claude/activate/start', methods=['POST'])
 @login_required
 def claude_activate_start():
-    session_id = str(uuid.uuid4())
-    sess = ActivationSession()
-    if sess.start():
-        activation_sessions[session_id] = sess
-        return jsonify({'success': True, 'session_id': session_id})
-    return jsonify({'success': False, 'error': 'Failed to start'})
+    try:
+        session_id = str(uuid.uuid4())
+        sess = ActivationSession()
+        if sess.start():
+            activation_sessions[session_id] = sess
+            return jsonify({'success': True, 'session_id': session_id})
+        return jsonify({'success': False, 'error': 'Failed to start activation session'})
+    except Exception as e:
+        import traceback
+        print(f"Activation start error: {e}")
+        print(traceback.format_exc())
+        return jsonify({'success': False, 'error': str(e)})
 
 @app.route('/api/claude/activate/output/<session_id>')
 @login_required

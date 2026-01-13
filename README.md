@@ -11,7 +11,7 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Dual-blue.svg" alt="License"></a>
-  <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-2.59.2-green.svg" alt="Version"></a>
+  <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-2.60.0-green.svg" alt="Version"></a>
   <img src="https://img.shields.io/badge/Ubuntu-22.04%20|%2024.04-orange.svg" alt="Ubuntu">
   <a href="https://anthropic.com"><img src="https://img.shields.io/badge/Powered%20by-Claude%20AI-blueviolet.svg" alt="Claude AI"></a>
   <a href="https://github.com/fotsakir/codehero/stargazers"><img src="https://img.shields.io/github/stars/fotsakir/codehero?style=social" alt="Stars"></a>
@@ -245,8 +245,8 @@ apt-get update && apt-get install -y unzip wget net-tools
 
 # Download and extract
 cd /root
-wget https://github.com/fotsakir/codehero/releases/latest/download/codehero-2.47.0.zip
-unzip codehero-2.47.0.zip
+wget https://github.com/fotsakir/codehero/releases/latest/download/codehero-2.60.0.zip
+unzip codehero-2.60.0.zip
 cd codehero
 
 # Run setup
@@ -271,7 +271,7 @@ The installer automatically sets up:
 ```bash
 # Download new version
 cd /root
-unzip codehero-2.47.0.zip
+unzip codehero-2.60.0.zip
 cd codehero
 
 # Preview changes (recommended)
@@ -298,6 +298,99 @@ The upgrade script will:
 | **Admin Panel** | `https://YOUR_IP:9453` | admin / admin123 |
 | Web Projects | `https://YOUR_IP:9867` | - |
 | OLS WebAdmin | `https://YOUR_IP:7080` | admin / 123456 |
+
+---
+
+## Claude Activation
+
+CodeHero requires Claude to be activated before it can work on tickets. You have **two activation methods** and can use either the **Web Terminal** or **Linux Terminal**.
+
+### Method 1: Claude Subscription (Pro/Max)
+
+If you have a Claude Pro or Claude Max subscription at [claude.ai](https://claude.ai), you can use it directly.
+
+#### Via Web Terminal (Dashboard)
+
+1. Go to **Dashboard** → Click **"Activate Claude"** button (or "License Active")
+2. Click **"Open Terminal"** in the Subscription section
+3. In the terminal, type:
+   ```bash
+   claude
+   ```
+4. Once Claude starts, type:
+   ```
+   /login
+   ```
+5. Claude will display a URL - **copy it** (right-click → Copy)
+6. Open the URL in your browser and authorize access
+7. Copy the authorization code from the browser
+8. Paste it back in the terminal (right-click → Paste)
+9. Done! Claude is now activated with your subscription
+
+#### Via Linux Terminal (SSH)
+
+1. SSH into your server or open a terminal
+2. Switch to the claude user:
+   ```bash
+   sudo su - claude
+   ```
+3. Run Claude and login:
+   ```bash
+   claude
+   ```
+4. Type `/login` and follow the same authorization flow as above
+
+### Method 2: Anthropic API Key
+
+If you have an API key from [console.anthropic.com](https://console.anthropic.com), you can use it instead of a subscription.
+
+#### Via Dashboard
+
+1. Go to **Dashboard** → Click **"Activate Claude"** button
+2. Select the **"API Key"** section
+3. Paste your API key (starts with `sk-ant-api...`)
+4. Click **Save**
+
+#### Via Linux Terminal
+
+1. SSH into your server
+2. Create or edit the environment file:
+   ```bash
+   sudo mkdir -p /home/claude/.claude
+   sudo nano /home/claude/.claude/.env
+   ```
+3. Add your API key:
+   ```
+   ANTHROPIC_API_KEY=sk-ant-api03-your-key-here
+   ```
+4. Save and set permissions:
+   ```bash
+   sudo chown claude:claude /home/claude/.claude/.env
+   sudo chmod 600 /home/claude/.claude/.env
+   ```
+
+### Verify Activation
+
+After activation, the **"Activate Claude"** button in the dashboard will change to **"License Active"** (green).
+
+You can also verify from terminal:
+```bash
+sudo su - claude
+claude --version
+```
+
+### Deactivate License
+
+To deactivate (e.g., to switch methods):
+1. Dashboard → Click **"License Active"** → **"Deactivate License"**
+
+Or via terminal:
+```bash
+rm /home/claude/.claude/.credentials.json
+rm /home/claude/.claude/.env
+```
+
+---
 
 ## How It Works
 

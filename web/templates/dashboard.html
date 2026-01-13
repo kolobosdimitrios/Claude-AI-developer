@@ -3,7 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CodeHero">
     <title>Dashboard - CodeHero</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32.png">
+    <link rel="shortcut icon" href="/static/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
+    <link rel="manifest" href="/static/manifest.json">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -1100,42 +1109,50 @@
 
     <!-- Activation Modal -->
     <div class="modal-overlay" id="activationModal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 550px;">
             <div class="modal-header">
                 <h2>Claude License Activation</h2>
                 <button class="modal-close" onclick="closeActivationModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="activation-tabs">
-                    <button class="activation-tab active" onclick="showActivationTab('subscription')">Subscription</button>
-                    <button class="activation-tab" onclick="showActivationTab('apikey')">API Key</button>
-                </div>
-
-                <!-- Subscription Tab -->
-                <div class="activation-panel active" id="panel-subscription">
-                    <p style="color: var(--text-secondary); margin-bottom: 16px;">
-                        Activate with your Claude Pro/Max subscription. Copy the URL, authorize in browser, then paste the code.
+                <!-- Subscription Option -->
+                <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+                    <h3 style="color: var(--accent-cyan); margin-bottom: 12px; font-size: 16px;">
+                        🔐 Claude Pro/Max Subscription
+                    </h3>
+                    <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 16px;">
+                        Activate using your claude.ai subscription.
                     </p>
-                    <p style="color: var(--accent-orange); font-size: 13px; margin-bottom: 16px;">
-                        <strong>Note:</strong> Use right-click for copy/paste, NOT Ctrl+C/Ctrl+V
-                    </p>
-                    <div id="activation-terminal" class="activation-terminal"></div>
-                    <div class="activation-controls">
-                        <button class="activation-btn activation-btn-primary" id="startActivationBtn" onclick="startActivation()">Start Activation</button>
-                        <button class="activation-btn activation-btn-secondary" id="stopActivationBtn" onclick="stopActivation()" disabled>Stop</button>
-                        <button class="activation-btn activation-btn-danger" id="deactivateBtn" onclick="deactivateLicense()" style="margin-left: auto; display: none;">Deactivate</button>
+                    <div style="background: var(--bg-card); border-radius: 8px; padding: 12px; margin-bottom: 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px;">
+                        <div style="color: var(--text-muted); margin-bottom: 8px;"># Run in terminal:</div>
+                        <div style="color: var(--accent-green);">claude</div>
+                        <div style="color: var(--text-muted); margin-top: 4px;"># Then type:</div>
+                        <div style="color: var(--accent-green);">/login</div>
                     </div>
+                    <a href="/terminal" class="activation-btn activation-btn-primary" style="display: inline-block; text-decoration: none; text-align: center;">
+                        Open Terminal
+                    </a>
                 </div>
 
-                <!-- API Key Tab -->
-                <div class="activation-panel" id="panel-apikey">
-                    <p style="color: var(--text-secondary); margin-bottom: 16px;">
-                        Activate with an Anthropic API key from console.anthropic.com
+                <!-- API Key Option -->
+                <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 20px;">
+                    <h3 style="color: var(--accent-orange); margin-bottom: 12px; font-size: 16px;">
+                        🔑 Anthropic API Key
+                    </h3>
+                    <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 16px;">
+                        Activate with an API key from <a href="https://console.anthropic.com" target="_blank" style="color: var(--accent-primary);">console.anthropic.com</a>
                     </p>
                     <div class="apikey-input">
                         <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-...">
-                        <button class="activation-btn activation-btn-primary" onclick="saveApiKey()">Save API Key</button>
+                        <button class="activation-btn activation-btn-primary" onclick="saveApiKey()">Save</button>
                     </div>
+                </div>
+
+                <!-- Deactivate Button (only shown when activated) -->
+                <div id="deactivateSection" style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-subtle); display: none;">
+                    <button class="activation-btn activation-btn-danger" onclick="deactivateLicense()" style="width: 100%;">
+                        Deactivate License
+                    </button>
                 </div>
 
                 <div id="activationStatus" style="margin-top: 16px; padding: 12px; border-radius: 8px; display: none;"></div>
@@ -1651,8 +1668,16 @@
         // Auto-refresh stats every 30 seconds
         setInterval(loadUsageStats, 30000);
 
-        // Full page refresh every 60 seconds
-        setTimeout(() => location.reload(), 60000);
+        // Full page refresh every 60 seconds (but not when modals are open)
+        setInterval(() => {
+            const activationModal = document.getElementById('activationModal');
+            const settingsModal = document.getElementById('settingsModal');
+            const isModalOpen = (activationModal && activationModal.classList.contains('show')) ||
+                               (settingsModal && settingsModal.classList.contains('show'));
+            if (!isModalOpen) {
+                location.reload();
+            }
+        }, 60000);
 
         // ============ CLAUDE ACTIVATION ============
 
@@ -1668,18 +1693,18 @@
                 const data = await resp.json();
                 const btn = document.getElementById('claudeLicenseBtn');
                 const text = document.getElementById('licenseText');
-                const deactivateBtn = document.getElementById('deactivateBtn');
+                const deactivateSection = document.getElementById('deactivateSection');
 
                 if (data.activated) {
                     btn.classList.remove('not-activated');
                     btn.classList.add('activated');
                     text.textContent = 'License Active';
-                    if (deactivateBtn) deactivateBtn.style.display = 'block';
+                    if (deactivateSection) deactivateSection.style.display = 'block';
                 } else {
                     btn.classList.remove('activated');
                     btn.classList.add('not-activated');
                     text.textContent = 'Activate Claude';
-                    if (deactivateBtn) deactivateBtn.style.display = 'none';
+                    if (deactivateSection) deactivateSection.style.display = 'none';
                 }
             } catch (e) {
                 console.error('Status check error:', e);
@@ -1688,9 +1713,6 @@
 
         function openActivationModal() {
             document.getElementById('activationModal').classList.add('show');
-            if (!activationTerm) {
-                initActivationTerminal();
-            }
             checkClaudeStatus();
         }
 
@@ -2094,6 +2116,13 @@
 
         // Check for updates on page load (after 3 seconds)
         setTimeout(checkForUpdates, 3000);
+
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/static/sw.js')
+                .then(reg => console.log('SW registered'))
+                .catch(err => console.log('SW failed:', err));
+        }
     </script>
 </body>
 </html>
