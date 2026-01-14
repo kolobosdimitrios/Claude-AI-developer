@@ -245,8 +245,8 @@ apt-get update && apt-get install -y unzip wget net-tools
 
 # Download and extract
 cd /root
-wget https://github.com/fotsakir/codehero/releases/latest/download/codehero-2.60.0.zip
-unzip codehero-2.60.0.zip
+wget https://github.com/fotsakir/codehero/releases/latest/download/codehero-2.60.3.zip
+unzip codehero-2.60.3.zip
 cd codehero
 
 # Run setup
@@ -271,7 +271,7 @@ The installer automatically sets up:
 ```bash
 # Download new version
 cd /root
-unzip codehero-2.60.0.zip
+unzip codehero-2.60.3.zip
 cd codehero
 
 # Preview changes (recommended)
